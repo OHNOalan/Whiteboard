@@ -10,7 +10,7 @@
 # https://gradle.org/
 # https://github.com/gradle/gradle
 
-image: gradle:alpine@sha256:3c83cc6f4184366d89f5cc008a2a741487617c4853cd1dae9f96c2a21b83256e
+image: arm64v8/gradle
 
 # Disable the Gradle daemon for Continuous Integration servers as correctness
 # is usually a priority over speed in CI environments. Using a fresh
