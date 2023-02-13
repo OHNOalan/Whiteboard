@@ -1,20 +1,19 @@
 package net.codebot.application
 
 import javafx.application.Application
-import javafx.scene.Scene
-import javafx.scene.control.Label
-import javafx.scene.layout.StackPane
 import javafx.stage.Stage
-import net.codebot.shared.SysInfo
+import net.codebot.application.components.AppLayout
+
 
 class Main : Application() {
     override fun start(stage: Stage) {
-        stage.scene = Scene(
-            StackPane(Label("Hello ${SysInfo.userName}")),
-            250.0,
-            150.0)
-        stage.isResizable = false
-        stage.title = "GUI Project"
+        stage.isResizable = true
+        stage.title = "Whiteboard"
+        stage.minHeight= 480.0
+        stage.minWidth= 640.0
+        stage.maxHeight = 1200.0
+        stage.maxWidth = 1600.0
+        AppLayout(stage)
         stage.show()
     }
 }
