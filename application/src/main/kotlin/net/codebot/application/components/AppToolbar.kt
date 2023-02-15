@@ -5,6 +5,7 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import net.codebot.application.components.tools.PenTool
 import net.codebot.application.components.tools.EraserTool
+import net.codebot.application.components.tools.ShapeTool
 import net.codebot.application.components.tools.TextTool
 
 class AppToolbar(sideBar: VBox, canvas: AppCanvas) {
@@ -23,11 +24,9 @@ class AppToolbar(sideBar: VBox, canvas: AppCanvas) {
         val lineTwo = HBox()
         lineTwo.spacing = 10.0
         lineTwo.children.add(AppUtils.createHSpacer())
-        // TODO Replace with another tool
         canvas.registerTool(TextTool(lineTwo))
         lineTwo.children.add(AppUtils.createHSpacer())
-        // TODO Replace with another tool
-        canvas.registerTool(TextTool(lineTwo))
+        canvas.registerTool(ShapeTool(lineTwo))
         lineTwo.children.add(AppUtils.createHSpacer())
 
         val toolsContainer = VBox()
