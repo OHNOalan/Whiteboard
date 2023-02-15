@@ -1,5 +1,6 @@
 package net.codebot.application.components.tools
 
+import net.codebot.application.components.tools.Text
 import javafx.event.EventHandler
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Button
@@ -7,6 +8,7 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
+import javafx.scene.layout.Pane
 import net.codebot.application.components.AppCanvas
 
 abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: String, buttonText: String, private val toolId: Int) {
@@ -33,7 +35,7 @@ abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: Strin
         canvasReference = canvas
     }
 
-    abstract fun canvasMousePressed(e: MouseEvent, context: GraphicsContext)
-    abstract fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext)
-    abstract fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext)
+    abstract fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane)
+    abstract fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane)
+    abstract fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane)
 }
