@@ -8,7 +8,9 @@ class AppLayout(stage: Stage) {
     init {
         val borderPane = BorderPane()
         val scene = Scene(borderPane, 1100.0, 800.0)
-        AppSidebar(borderPane, AppCanvas(borderPane))
+        val appCanvas = AppCanvas(borderPane)
+        AppSidebar(borderPane, appCanvas)
+        AppTopbar(borderPane, appCanvas)
         stage.scene = scene
     }
 }
