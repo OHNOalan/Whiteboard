@@ -4,6 +4,7 @@ import javafx.scene.canvas.GraphicsContext
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
+import net.codebot.application.components.AppCanvas
 
 // TODO get better images for this
 class EraserTool(container: HBox) : BaseTool(
@@ -13,15 +14,24 @@ class EraserTool(container: HBox) : BaseTool(
     "Eraser",
     ToolIndex.ERASER,
 ) {
+    override fun onSelectTool(canvas: AppCanvas) {
+        canvas.context.stroke = canvas.backgroundColour.value
+        canvas.context.lineWidth = 10.0
+    }
+
     override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        // TODO implement this
+        context.beginPath()
+        context.lineTo(e.x, e.y)
     }
 
     override fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        // TODO implement this
+        context.lineTo(e.x, e.y)
+        context.stroke()
     }
 
     override fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        // TODO implement this
+        context.lineTo(e.x, e.y)
+        context.stroke()
+        context.closePath()
     }
 }

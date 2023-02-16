@@ -12,8 +12,8 @@ import javafx.scene.layout.Pane
 import net.codebot.application.components.AppCanvas
 
 abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: String, buttonText: String, private val toolId: Int) {
-    private var canvasReference : AppCanvas? = null
-    private var cursorImage : Image = Image(cursorImageUrl)
+    private lateinit var canvasReference : AppCanvas
+    private var cursorImage : Image = Image(cursorImageUrl, 32.0, 32.0, true, true)
 
     init {
         val image = ImageView(Image(imageUrl, 80.0, 80.0, true, true))
@@ -28,8 +28,11 @@ abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: Strin
     }
 
     fun selectTool() {
-        canvasReference?.setTool(toolId, cursorImage)
+        canvasReference.setTool(toolId, cursorImage)
+        onSelectTool(canvasReference)
     }
+
+    abstract fun onSelectTool(canvas: AppCanvas)
 
     fun registerCanvas(canvas: AppCanvas) {
         canvasReference = canvas

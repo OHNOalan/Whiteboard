@@ -5,6 +5,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.shape.Rectangle
+import net.codebot.application.components.AppCanvas
 
 class ShapeTool(container: HBox) : BaseTool (
     container,
@@ -13,6 +14,8 @@ class ShapeTool(container: HBox) : BaseTool (
     "Shape",
     ToolIndex.SHAPE,
 ) {
+    override fun onSelectTool(canvas: AppCanvas) {}
+
     override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
         val shape = Rectangle()
         shape.translateX = e.x

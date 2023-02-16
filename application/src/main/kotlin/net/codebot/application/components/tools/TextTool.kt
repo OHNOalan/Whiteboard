@@ -6,6 +6,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import javafx.scene.text.Font
+import net.codebot.application.components.AppCanvas
 
 class TextTool(container: HBox) : BaseTool(
     container,
@@ -14,6 +15,8 @@ class TextTool(container: HBox) : BaseTool(
     "Text",
     ToolIndex.TEXT,
 ) {
+    override fun onSelectTool(canvas: AppCanvas) {}
+
     override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
         val text = TextArea("Hello")
         text.font = Font("Helvetica", 24.0)
