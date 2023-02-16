@@ -2,31 +2,37 @@ package net.codebot.application.components
 
 import net.codebot.application.components.tools.Text
 import javafx.event.EventHandler
+import javafx.geometry.Insets
 import javafx.scene.ImageCursor
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.ColorPicker
 import javafx.scene.control.ScrollPane
-import javafx.scene.layout.Pane
 import javafx.scene.control.TextArea
 import javafx.scene.image.Image
 import javafx.scene.input.MouseEvent
-import javafx.scene.layout.BorderPane
+import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.shape.Rectangle
 import net.codebot.application.components.tools.BaseTool
 
 class AppCanvas(borderPane: BorderPane) {
-    private val canvas = Canvas(800.0, 800.0)
+    private var width = 800.0
+    private var height = 800.0
+
+    private val canvas = Canvas(width, height)
     private val texts: MutableList<Text> = mutableListOf()
     private val tools: MutableList<BaseTool> = mutableListOf()
     private var selectedTool: Int = 0
+    private val scrollPane: ScrollPane = ScrollPane()
+    private val pane: Pane = Pane()
+
+    var backgroundColour = ColorPicker(Color.WHITE)
+    val context: GraphicsContext = canvas.graphicsContext2D
 
     init {
-        val scrollPane = ScrollPane()
-        val pane = Pane()
-        val context: GraphicsContext = canvas.graphicsContext2D
-        val lineColor = ColorPicker(Color.BLACK)
-        context.stroke = lineColor.value
+        pane.background = Background(BackgroundFill(backgroundColour.value, CornerRadii.EMPTY, Insets.EMPTY))
+
         canvas.onMousePressed = EventHandler { e: MouseEvent ->
             tools[selectedTool].canvasMousePressed(e, context, pane)
         }
