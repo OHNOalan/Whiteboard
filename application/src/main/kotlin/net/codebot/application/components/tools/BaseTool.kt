@@ -10,10 +10,12 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Pane
 import net.codebot.application.components.AppCanvas
+import net.codebot.application.components.tools.styles.BaseStyles
 
 abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: String, buttonText: String, private val toolId: Int) {
-    private lateinit var canvasReference : AppCanvas
     private var cursorImage : Image = Image(cursorImageUrl, 32.0, 32.0, true, true)
+    protected lateinit var canvasReference : AppCanvas
+    protected open val stylesControl : BaseStyles? = null
 
     init {
         val image = ImageView(Image(imageUrl, 80.0, 80.0, true, true))
@@ -29,16 +31,25 @@ abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: Strin
 
     fun selectTool() {
         canvasReference.setTool(toolId, cursorImage)
-        onSelectTool(canvasReference)
+        stylesControl?.create()
+        onSelectTool()
     }
 
-    abstract fun onSelectTool(canvas: AppCanvas)
+    fun deselectTool() {
+        stylesControl?.destroy()
+        onDeselectTool()
+    }
+
+    protected open fun onSelectTool() {}
+
+    protected open fun onDeselectTool() {}
 
     fun registerCanvas(canvas: AppCanvas) {
         canvasReference = canvas
     }
 
-    abstract fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane)
-    abstract fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane)
-    abstract fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane)
+    open fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
+    open fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
+    open fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
+    open fun canvasMouseMoved(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
 }

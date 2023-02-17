@@ -15,8 +15,6 @@ class TextTool(container: HBox) : BaseTool(
     "Text",
     ToolIndex.TEXT,
 ) {
-    override fun onSelectTool(canvas: AppCanvas) {}
-
     override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
         val text = TextArea("Hello")
         text.font = Font("Helvetica", 24.0)
@@ -27,8 +25,4 @@ class TextTool(container: HBox) : BaseTool(
         text.style = "-fx-background-color: #000000"
         pane.children.add(text)
     }
-
-    override fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
-
-    override fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
 }
