@@ -25,7 +25,7 @@ class AppCanvas(borderPane: BorderPane) {
     private val tools: MutableList<BaseTool> = mutableListOf()
     private var selectedTool: Int = 0
     private val scrollPane: ScrollPane = ScrollPane()
-    private val pane: Pane = Pane()
+    val pane: Pane = Pane()
 
     var backgroundColour = ColorPicker(Color.WHITE)
     val context: GraphicsContext = canvas.graphicsContext2D
@@ -42,6 +42,9 @@ class AppCanvas(borderPane: BorderPane) {
         canvas.onMouseReleased = EventHandler { e: MouseEvent ->
             tools[selectedTool].canvasMouseReleased(e, context, pane)
         }
+        canvas.onMouseMoved = EventHandler { e: MouseEvent ->
+            tools[selectedTool].canvasMouseMoved(e, context, pane)
+        }
         canvas.widthProperty().bind(scrollPane.widthProperty())
         canvas.heightProperty().bind(scrollPane.heightProperty())
         pane.children.add(canvas)
@@ -50,6 +53,7 @@ class AppCanvas(borderPane: BorderPane) {
     }
 
     fun setTool(toolIndex: Int, cursorImage: Image) {
+        tools[selectedTool].deselectTool()
         selectedTool = toolIndex
         canvas.cursor = ImageCursor(
             cursorImage,

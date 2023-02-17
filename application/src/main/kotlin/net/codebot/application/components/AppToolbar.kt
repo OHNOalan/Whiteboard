@@ -8,17 +8,15 @@ import net.codebot.application.components.tools.PenTool
 import net.codebot.application.components.tools.ShapeTool
 import net.codebot.application.components.tools.TextTool
 
-class AppToolbar(sideBar: VBox, canvas: AppCanvas) {
+class AppToolbar(sideBar: VBox, canvas: AppCanvas, stylebar: AppStylebar) {
     init {
         val lineOne = HBox()
         lineOne.spacing = 10.0
         lineOne.children.add(AppUtils.createHSpacer())
-        val penTool = PenTool(lineOne)
+        val penTool = PenTool(lineOne, stylebar)
         canvas.registerTool(penTool)
-        // The default tool is the pen tool, so we select it
-        penTool.selectTool()
         lineOne.children.add(AppUtils.createHSpacer())
-        canvas.registerTool(EraserTool(lineOne))
+        canvas.registerTool(EraserTool(lineOne, stylebar))
         lineOne.children.add(AppUtils.createHSpacer())
 
         val lineTwo = HBox()
@@ -34,5 +32,8 @@ class AppToolbar(sideBar: VBox, canvas: AppCanvas) {
         toolsContainer.spacing = 20.0
         toolsContainer.children.addAll(AppUtils.createVSpacer(), lineOne, lineTwo, AppUtils.createVSpacer())
         sideBar.children.add(toolsContainer)
+
+        // The default tool is the pen tool, so we select it
+        penTool.selectTool()
     }
 }

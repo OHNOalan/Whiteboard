@@ -14,8 +14,6 @@ class ShapeTool(container: HBox) : BaseTool (
     "Shape",
     ToolIndex.SHAPE,
 ) {
-    override fun onSelectTool(canvas: AppCanvas) {}
-
     override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
         val shape = Rectangle()
         shape.translateX = e.x
@@ -24,9 +22,4 @@ class ShapeTool(container: HBox) : BaseTool (
         shape.height = 20.0
         pane.children.add(shape)
     }
-
-    override fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
-
-    override fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
-
 }
