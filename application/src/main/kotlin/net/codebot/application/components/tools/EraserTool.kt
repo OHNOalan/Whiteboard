@@ -1,9 +1,8 @@
 package net.codebot.application.components.tools
 
-import javafx.scene.canvas.GraphicsContext
+import javafx.scene.Node
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import net.codebot.application.components.AppStylebar
@@ -16,11 +15,10 @@ class EraserTool(container: HBox, stylebar: AppStylebar) : BaseTool(
     "Eraser",
     ToolIndex.ERASER,
 ) {
-    private val radiusOffset: Double = 3.0
-    public var lineWidth = 30.0
+    private val radiusOffset: Double = 1.0
+    var lineWidth = 30.0
         set(value) {
             field = value
-            canvasReference.context.lineWidth = value
             pointer.radius = value + radiusOffset
         }
     private val pointer = Circle(-100.0, -100.0, lineWidth + radiusOffset)
@@ -28,39 +26,45 @@ class EraserTool(container: HBox, stylebar: AppStylebar) : BaseTool(
 
     init {
         pointer.fill = null
-        pointer.stroke= Color.BLACK
+        pointer.stroke = Color.BLACK
         pointer.isPickOnBounds = false
     }
 
+    private fun eraseNodes() {
+        val toBeErased = mutableListOf<Node>()
+        for (node in canvasReference.children) {
+            if (node != pointer && node.boundsInParent.intersects(pointer.boundsInParent)) {
+                toBeErased.add(node)
+            }
+        }
+        for (node in toBeErased) {
+            canvasReference.removeDrawnNode(node)
+        }
+    }
+
     override fun onSelectTool() {
-        canvasReference.context.stroke = canvasReference.backgroundColour.value
-        canvasReference.context.lineWidth = lineWidth
-        canvasReference.pane.children.add(pointer)
+        canvasReference.children.add(pointer)
     }
 
     override fun onDeselectTool() {
-        canvasReference.pane.children.remove(pointer)
+        canvasReference.children.remove(pointer)
     }
 
-    override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        context.beginPath()
-        context.lineTo(e.x, e.y)
+    override fun canvasMousePressed(e: MouseEvent) {
+        eraseNodes()
     }
 
-    override fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        context.lineTo(e.x, e.y)
-        context.stroke()
+    override fun canvasMouseDragged(e: MouseEvent) {
+        eraseNodes()
         pointer.centerX = e.x
         pointer.centerY = e.y
     }
 
-    override fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        context.lineTo(e.x, e.y)
-        context.stroke()
-        context.closePath()
+    override fun canvasMouseReleased(e: MouseEvent) {
+        eraseNodes()
     }
 
-    override fun canvasMouseMoved(e: MouseEvent, context: GraphicsContext, pane: Pane) {
+    override fun canvasMouseMoved(e: MouseEvent) {
         pointer.centerX = e.x
         pointer.centerY = e.y
     }

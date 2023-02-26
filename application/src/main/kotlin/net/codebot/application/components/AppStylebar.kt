@@ -6,7 +6,7 @@ import javafx.scene.layout.VBox
 
 class AppStylebar(sideBar: VBox) : VBox() {
     init {
-        this.alignment = Pos.CENTER_LEFT;
+        this.alignment = Pos.CENTER_LEFT
         this.padding = Insets(50.0, 50.0, 50.0, 50.0)
         this.spacing = 20.0
     }
