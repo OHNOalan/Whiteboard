@@ -1,14 +1,11 @@
 package net.codebot.application.components.tools
 
-import net.codebot.application.components.tools.Text
 import javafx.event.EventHandler
-import javafx.scene.canvas.GraphicsContext
 import javafx.scene.control.Button
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.tools.styles.BaseStyles
 
@@ -48,8 +45,8 @@ abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: Strin
         canvasReference = canvas
     }
 
-    open fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
-    open fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
-    open fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
-    open fun canvasMouseMoved(e: MouseEvent, context: GraphicsContext, pane: Pane) {}
+    open fun canvasMousePressed(e: MouseEvent) {}
+    open fun canvasMouseDragged(e: MouseEvent) {}
+    open fun canvasMouseReleased(e: MouseEvent) {}
+    open fun canvasMouseMoved(e: MouseEvent) {}
 }

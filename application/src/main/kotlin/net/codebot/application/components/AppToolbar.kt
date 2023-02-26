@@ -24,7 +24,7 @@ class AppToolbar(sideBar: VBox, canvas: AppCanvas, stylebar: AppStylebar) {
         lineTwo.children.add(AppUtils.createHSpacer())
         canvas.registerTool(TextTool(lineTwo))
         lineTwo.children.add(AppUtils.createHSpacer())
-        canvas.registerTool(ShapeTool(lineTwo))
+        canvas.registerTool(ShapeTool(lineTwo, stylebar))
         lineTwo.children.add(AppUtils.createHSpacer())
 
         val toolsContainer = VBox()

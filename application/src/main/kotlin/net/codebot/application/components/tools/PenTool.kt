@@ -1,17 +1,14 @@
 package net.codebot.application.components.tools
 
-import javafx.scene.canvas.GraphicsContext
-import javafx.scene.control.ColorPicker
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
-import javafx.scene.layout.Pane
-import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
-import net.codebot.application.components.AppCanvas
-import net.codebot.application.components.AppSidebar
+import javafx.scene.shape.Polyline
+import javafx.scene.shape.StrokeLineCap
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.tools.styles.PenStyles
+
 
 class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
     container,
@@ -20,21 +17,22 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
     "Pen",
     ToolIndex.PEN,
 ) {
-    private val radiusOffset: Double = 3.0
+    private val radiusOffset: Double = 1.0
+    private val maxSampling = 2
     var lineColor: Color = Color.BLACK
         set(value) {
             field = value
-            canvasReference.context.stroke = value
             pointer.stroke = value
         }
     var lineWidth = 1.0
         set(value) {
             field = value
-            canvasReference.context.lineWidth = value
             pointer.radius = value + radiusOffset
         }
     private val pointer = Circle(-100.0, -100.0, lineWidth + radiusOffset)
     override val stylesControl = PenStyles(stylebar, this)
+    private lateinit var currentPolyline: Polyline
+    private var currentSampling = maxSampling
 
     init {
         pointer.fill = null
@@ -43,34 +41,49 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
     }
 
     override fun onSelectTool() {
-        canvasReference.context.stroke = lineColor
-        canvasReference.context.lineWidth = lineWidth
-        canvasReference.pane.children.add(pointer)
+        canvasReference.children.add(pointer)
     }
 
     override fun onDeselectTool() {
-        canvasReference.pane.children.remove(pointer)
+        canvasReference.children.remove(pointer)
     }
 
-    override fun canvasMousePressed(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        context.beginPath()
-        context.lineTo(e.x, e.y)
+    override fun canvasMousePressed(e: MouseEvent) {
+        currentPolyline = Polyline()
+        currentPolyline.stroke = lineColor
+        currentPolyline.strokeWidth = lineWidth
+        currentPolyline.strokeLineCap = StrokeLineCap.ROUND
+        currentPolyline.points.addAll(
+            *arrayOf(
+                e.x, e.y
+            )
+        )
+        canvasReference.addDrawnNode(currentPolyline)
     }
 
-    override fun canvasMouseDragged(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        context.lineTo(e.x, e.y)
-        context.stroke()
+    override fun canvasMouseDragged(e: MouseEvent) {
+        currentSampling--
+        if (currentSampling <= 0) {
+            currentSampling= maxSampling
+            currentPolyline.points.addAll(
+            *arrayOf(
+                e.x, e.y
+            )
+            )
+        }
         pointer.centerX = e.x
         pointer.centerY = e.y
     }
 
-    override fun canvasMouseReleased(e: MouseEvent, context: GraphicsContext, pane: Pane) {
-        context.lineTo(e.x, e.y)
-        context.stroke()
-        context.closePath()
+    override fun canvasMouseReleased(e: MouseEvent) {
+        currentPolyline.points.addAll(
+            *arrayOf(
+                e.x, e.y
+            )
+        )
     }
 
-    override fun canvasMouseMoved(e: MouseEvent, context: GraphicsContext, pane: Pane) {
+    override fun canvasMouseMoved(e: MouseEvent) {
         pointer.centerX = e.x
         pointer.centerY = e.y
     }

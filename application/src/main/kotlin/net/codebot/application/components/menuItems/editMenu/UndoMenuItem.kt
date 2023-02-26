@@ -14,6 +14,6 @@ class UndoMenuItem(menu: Menu, canvas: AppCanvas) :
     private var canvasReference: AppCanvas = canvas
     
     override fun onItemClicked(e: ActionEvent) {
-        // TODO implement this
+        canvasReference.undo()
     }
 }
