@@ -5,4 +5,5 @@ object ToolIndex {
     const val ERASER = 1
     const val TEXT = 2
     const val SHAPE = 3
+    const val SELECTION = 4
 }

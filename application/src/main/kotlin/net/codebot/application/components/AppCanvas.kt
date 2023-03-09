@@ -12,7 +12,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import net.codebot.application.components.tools.BaseTool
 
-class AppCanvas(borderPane: BorderPane): Pane() {
+class AppCanvas(borderPane: BorderPane) : Pane() {
     private val tools: MutableList<BaseTool> = mutableListOf()
     private val undoStack: ArrayDeque<Pair<String, Node>> = ArrayDeque()
     private val redoStack: ArrayDeque<Pair<String, Node>> = ArrayDeque()
@@ -22,8 +22,8 @@ class AppCanvas(borderPane: BorderPane): Pane() {
     private var backgroundColor = ColorPicker(Color.WHITE)
 
     init {
-        this.prefHeight = 800.0
-        this.prefWidth = 800.0
+        this.prefHeight = 1200.0
+        this.prefWidth = 1600.0
         this.background = Background(BackgroundFill(backgroundColor.value, CornerRadii.EMPTY, Insets.EMPTY))
         this.onMousePressed = EventHandler { e: MouseEvent ->
             tools[selectedTool].canvasMousePressed(e)
