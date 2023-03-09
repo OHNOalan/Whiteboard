@@ -3,10 +3,7 @@ package net.codebot.application.components
 import javafx.geometry.Insets
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
-import net.codebot.application.components.tools.EraserTool
-import net.codebot.application.components.tools.PenTool
-import net.codebot.application.components.tools.ShapeTool
-import net.codebot.application.components.tools.TextTool
+import net.codebot.application.components.tools.*
 
 class AppToolbar(sideBar: VBox, canvas: AppCanvas, stylebar: AppStylebar) {
     init {
@@ -27,10 +24,16 @@ class AppToolbar(sideBar: VBox, canvas: AppCanvas, stylebar: AppStylebar) {
         canvas.registerTool(ShapeTool(lineTwo, stylebar))
         lineTwo.children.add(AppUtils.createHSpacer())
 
+        val lineThree = HBox()
+        lineThree.spacing = 10.0
+        lineThree.children.add(AppUtils.createHSpacer())
+        canvas.registerTool(SelectionTool(lineThree))
+        lineThree.children.add(AppUtils.createHSpacer())
+
         val toolsContainer = VBox()
         toolsContainer.padding = Insets(0.0, 20.0, 0.0, 20.0)
         toolsContainer.spacing = 20.0
-        toolsContainer.children.addAll(AppUtils.createVSpacer(), lineOne, lineTwo, AppUtils.createVSpacer())
+        toolsContainer.children.addAll(AppUtils.createVSpacer(), lineOne, lineTwo, lineThree, AppUtils.createVSpacer())
         sideBar.children.add(toolsContainer)
 
         // The default tool is the pen tool, so we select it
