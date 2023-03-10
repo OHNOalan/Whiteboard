@@ -20,7 +20,7 @@ class SelectionTool(container: HBox) : BaseTool(
     // selectedRectangle is for displaying the resulting selection
     private lateinit var selectionRectangle: Rectangle
     private lateinit var selectedRectangle: Rectangle
-    private var selection = false
+    private var itemIsSelected = false
     private var moving = false
     private var corners = listOf<Rectangle>()
     private val selectedNodes = mutableListOf<Node>()
@@ -86,35 +86,39 @@ class SelectionTool(container: HBox) : BaseTool(
                 (y >= bounds.minY && y <= bounds.maxY)
     }
 
-    private fun deleteSelectedBox() {
-        canvasReference.children.remove(selectedRectangle)
-        corners.forEach { canvasReference.children.remove(it) }
+    // Safe to call even if nothing is selected
+    // May be called by the AppCanvas on undo/redo
+    fun deselect() {
+        if (itemIsSelected) {
+            canvasReference.children.remove(selectedRectangle)
+            corners.forEach { canvasReference.children.remove(it) }
 
-        // re-enable textarea nodes
-        selectedNodes.map {
-            if (it is TextArea) {
-                it.isDisable = false
+            // re-enable textarea nodes
+            selectedNodes.map {
+                if (it is TextArea) {
+                    it.isDisable = false
+                }
             }
-        }
 
-        selectedNodes.clear()
-        selection = false
+            selectedNodes.clear()
+            itemIsSelected = false
+        }
     }
 
     private fun deleteSelection() {
-        deleteSelectedBox()
+        deselect()
         selectedNodes.forEach { canvasReference.children.remove(it) }
     }
 
     override fun canvasMousePressed(e: MouseEvent) {
         // if click is inside selection then we are now moving the selection
-        if (selection && isClickInSelectionBox(e.x, e.y)) {
+        if (itemIsSelected && isClickInSelectionBox(e.x, e.y)) {
             moving = true
             moveX = e.x
             moveY = e.y
         } else {
-            if (selection) {
-                deleteSelectedBox()
+            if (itemIsSelected) {
+                deselect()
             }
             // make new selection
             onCreateShape(e.x, e.y)
@@ -174,7 +178,7 @@ class SelectionTool(container: HBox) : BaseTool(
             canvasReference.children.remove(selectionRectangle)
 
             if (selectedNodes.isNotEmpty()) {
-                selection = true
+                itemIsSelected = true
                 selectedRectangle = onCreateRectangle(minX - lineWidth / 2, minY - lineWidth / 2, selectedLineColor)
                 onResizeRectangle(selectedRectangle, maxX + lineWidth / 2, maxY + lineWidth / 2)
 
@@ -221,6 +225,6 @@ class SelectionTool(container: HBox) : BaseTool(
     }
 
     override fun onDeselectTool() {
-        deleteSelectedBox()
+        deselect()
     }
 }
