@@ -7,6 +7,10 @@ import javafx.scene.Node
 import javafx.scene.control.ColorPicker
 import javafx.scene.control.ScrollPane
 import javafx.scene.image.Image
+import javafx.scene.image.PixelFormat
+import javafx.scene.image.PixelReader
+import javafx.scene.image.WritableImage
+import javafx.scene.image.WritablePixelFormat
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
@@ -17,6 +21,11 @@ import javafx.scene.shape.Rectangle
 import net.codebot.application.components.tools.BaseTool
 import net.codebot.application.components.tools.SelectionTool
 import net.codebot.application.components.tools.ToolIndex
+import java.awt.image.BufferedImage
+import java.io.File
+import java.io.IOException
+import java.nio.IntBuffer
+import javax.imageio.ImageIO
 
 class AppCanvas(borderPane: BorderPane) : Pane() {
     private val tools: MutableList<BaseTool> = mutableListOf()
@@ -89,9 +98,27 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     // the selection box will remain and can still be interacted with.
     // TODO can be more sophisticated - can add check in SelectionTool if the undo/redo item matches the selected item
     private fun deselectItemIfSelected() {
-        if (selectedTool == ToolIndex.SELECTION) {
-            val selectionTool = tools[selectedTool] as SelectionTool
-            selectionTool.deselect()
+        val selectionTool = tools[ToolIndex.SELECTION] as SelectionTool
+        selectionTool.deselect()
+    }
+
+    fun exportCanvas(fileName: String) {
+        try {
+            val writableImage = WritableImage(this.prefWidth.toInt(), this.prefHeight.toInt())
+            this.snapshot(null, writableImage)
+
+            val pixelReader: PixelReader = writableImage.pixelReader
+            val buffer: IntBuffer = IntBuffer.allocate(writableImage.width.toInt() * writableImage.height.toInt())
+            val pixelFormat: WritablePixelFormat<IntBuffer> = PixelFormat.getIntArgbInstance()
+            pixelReader.getPixels(0, 0, writableImage.width.toInt(), writableImage.height.toInt(), pixelFormat, buffer, writableImage.width.toInt())
+
+            val bufferedImage = BufferedImage(writableImage.width.toInt(), writableImage.height.toInt(), BufferedImage.TYPE_INT_ARGB)
+            bufferedImage.setRGB(0 ,0, writableImage.width.toInt(), writableImage.height.toInt(), buffer.array(), 0, writableImage.width.toInt())
+
+            ImageIO.write(bufferedImage, "png", File(fileName))
+        } catch (ex: IOException) {
+            ex.printStackTrace()
+            println("Error while trying to export canvas as an image")
         }
     }
 
@@ -223,5 +250,6 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         drawnItems.clear()
         undoStack.clear()
         redoStack.clear()
+        deselectItemIfSelected()
     }
 }
