@@ -10,6 +10,7 @@ import net.codebot.application.components.menuItems.fileMenu.ExitMenuItem
 import net.codebot.application.components.menuItems.fileMenu.LoadMenuItem
 import net.codebot.application.components.menuItems.fileMenu.SaveAsMenuItem
 import net.codebot.application.components.menuItems.fileMenu.SaveMenuItem
+import net.codebot.application.components.menuItems.viewMenu.ResetZoomMenuItem
 import net.codebot.application.components.menuItems.viewMenu.ZoomInMenuItem
 import net.codebot.application.components.menuItems.viewMenu.ZoomOutMenuItem
 
@@ -37,6 +38,7 @@ class AppMenubar(topBar: VBox, canvas: AppCanvas) {
         val viewMenu = Menu("View")
         ZoomInMenuItem(viewMenu, canvas)
         ZoomOutMenuItem(viewMenu, canvas)
+        ResetZoomMenuItem(viewMenu, canvas)
 
         menuBar.menus.add(viewMenu)
 

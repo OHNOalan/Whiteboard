@@ -53,6 +53,21 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         undoStack.addFirst(action)
     }
 
+    fun zoomIn() {
+        this.scaleX += 0.1
+        this.scaleY += 0.1
+    }
+
+    fun zoomOut() {
+        this.scaleX -= 0.1
+        this.scaleY -= 0.1
+    }
+
+    fun resetZoom() {
+        this.scaleX = 1.0
+        this.scaleY = 1.0
+    }
+
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun addDrawnNode(node: Node) {

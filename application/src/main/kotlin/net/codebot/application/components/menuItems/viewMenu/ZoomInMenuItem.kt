@@ -14,6 +14,6 @@ class ZoomInMenuItem(menu: Menu, canvas: AppCanvas) :
     private var canvasReference: AppCanvas = canvas
     
     override fun onItemClicked(e: ActionEvent) {
-        // TODO implement this
+        canvasReference.zoomIn()
     }
 }

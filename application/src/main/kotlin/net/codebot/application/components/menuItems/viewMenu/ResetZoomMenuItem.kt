@@ -8,12 +8,12 @@ import javafx.scene.input.KeyCombination
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.menuItems.BaseMenuItem
 
-class ZoomOutMenuItem(menu: Menu, canvas: AppCanvas) :
-    BaseMenuItem(menu, "Zoom Out", KeyCodeCombination(KeyCode.MINUS, KeyCombination.CONTROL_DOWN)) {
+class ResetZoomMenuItem(menu: Menu, canvas: AppCanvas) :
+    BaseMenuItem(menu, "Reset Zoom", KeyCodeCombination(KeyCode.R, KeyCombination.CONTROL_DOWN)) {
 
     private var canvasReference: AppCanvas = canvas
     
     override fun onItemClicked(e: ActionEvent) {
-        canvasReference.zoomOut()
+        canvasReference.resetZoom()
     }
 }
