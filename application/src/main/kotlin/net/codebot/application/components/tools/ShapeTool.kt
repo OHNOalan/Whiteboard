@@ -9,6 +9,7 @@ import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.tools.styles.ShapeStyles
 import kotlin.math.abs
+import kotlin.math.min
 
 class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
     container,
@@ -51,48 +52,46 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         canvasReference.addDrawnNode(ellipse)
     }
 
-    fun onMoveRectangle(x: Double, y: Double) {
+    fun onMoveRectangle(x: Double, y: Double, isSquare: Boolean = false) {
+        var width = abs(x - startX)
+        var height = abs(y - startY)
+        if (isSquare) {
+            width = min(width, height)
+            height = width
+        }
+
         if (x < startX) {
-            rectangle.translateX = x
-            rectangle.width = startX - x
+            rectangle.translateX = if (isSquare) startX - width else x
         } else {
             rectangle.translateX = startX
-            rectangle.width = x - startX
         }
+
         if (y < startY) {
-            rectangle.translateY = y
-            rectangle.height = startY - y
+            rectangle.translateY = if (isSquare) startY - width else y
         } else {
             rectangle.translateY = startY
-            rectangle.height = y - startY
         }
+
+        rectangle.width = width
+        rectangle.height = height
     }
 
     fun onMoveSquare(x: Double, y: Double) {
-        if (x < startX) {
-            rectangle.translateX = x
-            rectangle.width = startX - x
-        } else {
-            rectangle.translateX = startX
-            rectangle.width = x - startX
-        }
-        if (y < startY) {
-            rectangle.translateY = y
-            rectangle.height = abs(startX - x)
-        } else {
-            rectangle.translateY = startY
-            rectangle.height = abs(startX - x)
-        }
+        onMoveRectangle(x, y, true)
     }
 
-    fun onMoveEllipse(x: Double, y: Double) {
+    fun onMoveEllipse(x: Double, y: Double, isCircle: Boolean = false) {
         ellipse.radiusX = abs(x - ellipse.centerX)
-        ellipse.radiusY = abs(y - ellipse.centerY)
+
+        if (isCircle) {
+            ellipse.radiusY = abs(x - ellipse.centerX)
+        } else {
+            ellipse.radiusY = abs(y - ellipse.centerY)
+        }
     }
 
     fun onMoveCircle(x: Double, y: Double) {
-        ellipse.radiusX = abs(x - ellipse.centerX)
-        ellipse.radiusY = abs(x - ellipse.centerX)
+        onMoveEllipse(x, y, true)
     }
 
     override fun canvasMousePressed(e: MouseEvent) {

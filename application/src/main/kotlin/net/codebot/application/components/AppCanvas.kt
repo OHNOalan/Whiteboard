@@ -15,6 +15,8 @@ import javafx.scene.shape.Ellipse
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
 import net.codebot.application.components.tools.BaseTool
+import net.codebot.application.components.tools.SelectionTool
+import net.codebot.application.components.tools.ToolIndex
 
 class AppCanvas(borderPane: BorderPane) : Pane() {
     private val tools: MutableList<BaseTool> = mutableListOf()
@@ -45,10 +47,16 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         borderPane.center = scrollPane
     }
 
+    private fun addToUndoStack(action: Pair<String, Node>) {
+        // clear redo stack - overwriting old undone changes
+        redoStack.clear()
+        undoStack.addFirst(action)
+    }
+
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun addDrawnNode(node: Node) {
-        undoStack.addFirst(Pair("Add", node))
+        addToUndoStack(Pair("Add", node))
         drawnItems.add(node)
         this.children.add(node)
     }
@@ -56,9 +64,20 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun removeDrawnNode(node: Node) {
-        undoStack.addFirst(Pair("Remove", node))
+        addToUndoStack(Pair("Remove", node))
         drawnItems.remove(node)
         this.children.remove(node)
+    }
+
+    // Upon undo or redo, if an item is selected, it should be deselected
+    // This fixes a bug where if an item is selected and its creation is undone,
+    // the selection box will remain and can still be interacted with.
+    // TODO can be more sophisticated - can add check in SelectionTool if the undo/redo item matches the selected item
+    private fun deselectItemIfSelected() {
+        if (selectedTool == ToolIndex.SELECTION) {
+            val selectionTool = tools[selectedTool] as SelectionTool
+            selectionTool.deselect()
+        }
     }
 
     fun saveFile(): String {
@@ -141,6 +160,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
 
     fun undo() {
         if (undoStack.size > 0) {
+            deselectItemIfSelected()
             val (undoType, node) = undoStack.removeFirst()
             if (undoType == "Add") {
                 drawnItems.remove(node)
@@ -155,6 +175,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
 
     fun redo() {
         if (redoStack.size > 0) {
+            deselectItemIfSelected()
             val (redoType, node) = redoStack.removeFirst()
             if (redoType == "Add") {
                 drawnItems.add(node)
