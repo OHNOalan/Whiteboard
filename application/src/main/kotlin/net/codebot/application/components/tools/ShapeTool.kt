@@ -6,6 +6,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Ellipse
 import javafx.scene.shape.Rectangle
 import net.codebot.application.components.AppStylebar
+import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.tools.styles.ShapeStyles
 import kotlin.math.abs
 
@@ -35,6 +36,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         startY = y
         rectangle.translateX = x
         rectangle.translateY = y
+        rectangle.userData = EntityIndex.RECTANGLE
         canvasReference.addDrawnNode(rectangle)
     }
 
@@ -45,6 +47,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         ellipse.fill = if (fillShape) lineColor else null
         ellipse.centerX = x
         ellipse.centerY = y
+        ellipse.userData = EntityIndex.ELLIPSE
         canvasReference.addDrawnNode(ellipse)
     }
 
