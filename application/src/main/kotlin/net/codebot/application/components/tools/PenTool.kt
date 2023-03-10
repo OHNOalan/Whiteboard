@@ -7,6 +7,7 @@ import javafx.scene.shape.Circle
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.StrokeLineCap
 import net.codebot.application.components.AppStylebar
+import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.tools.styles.PenStyles
 
 
@@ -58,6 +59,7 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
                 e.x, e.y
             )
         )
+        currentPolyline.userData = EntityIndex.LINE
         canvasReference.addDrawnNode(currentPolyline)
     }
 
