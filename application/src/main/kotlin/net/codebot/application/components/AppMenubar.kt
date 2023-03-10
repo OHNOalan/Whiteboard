@@ -6,10 +6,7 @@ import javafx.scene.layout.VBox
 import net.codebot.application.components.menuItems.editMenu.ClearMenuItem
 import net.codebot.application.components.menuItems.editMenu.RedoMenuItem
 import net.codebot.application.components.menuItems.editMenu.UndoMenuItem
-import net.codebot.application.components.menuItems.fileMenu.ExitMenuItem
-import net.codebot.application.components.menuItems.fileMenu.LoadMenuItem
-import net.codebot.application.components.menuItems.fileMenu.SaveAsMenuItem
-import net.codebot.application.components.menuItems.fileMenu.SaveMenuItem
+import net.codebot.application.components.menuItems.fileMenu.*
 import net.codebot.application.components.menuItems.viewMenu.ResetZoomMenuItem
 import net.codebot.application.components.menuItems.viewMenu.ZoomInMenuItem
 import net.codebot.application.components.menuItems.viewMenu.ZoomOutMenuItem
@@ -22,6 +19,7 @@ class AppMenubar(topBar: VBox, canvas: AppCanvas) {
         val saveMenuItem = SaveMenuItem(fileMenu, canvas)
         SaveAsMenuItem(fileMenu, canvas, saveMenuItem)
         LoadMenuItem(fileMenu, canvas)
+        ExportMenuItem(fileMenu, canvas)
         ExitMenuItem(fileMenu)
 
         menuBar.menus.add(fileMenu)
