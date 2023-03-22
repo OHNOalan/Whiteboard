@@ -60,7 +60,8 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
             )
         )
         currentPolyline.userData = EntityIndex.LINE
-        canvasReference.addDrawnNode(currentPolyline)
+        // We let the current line be a preview only and will only commit if mouse is released
+        canvasReference.children.add(currentPolyline)
     }
 
     override fun canvasMouseDragged(e: MouseEvent) {
@@ -83,6 +84,9 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
                 e.x, e.y
             )
         )
+        // Commit the current line by removing its preview element and adding the drawn node
+        canvasReference.children.remove(currentPolyline)
+        canvasReference.addDrawnNode(currentPolyline)
     }
 
     override fun canvasMouseMoved(e: MouseEvent) {

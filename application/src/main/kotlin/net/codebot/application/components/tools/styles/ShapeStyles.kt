@@ -50,21 +50,25 @@ class ShapeStyles(styleBar: AppStylebar, shapeTool : ShapeTool) : BaseStyles(sty
         rectangleButton.onMouseClicked = EventHandler {
             shapeTool.onCreateShape = { x, y -> shapeTool.onCreateRectangle(x, y) }
             shapeTool.onMoveShape = { x, y -> shapeTool.onMoveRectangle(x, y) }
+            shapeTool.onReleaseShape = { shapeTool.onReleaseRectangle() }
         }
         val squareButton = Button("Square")
         squareButton.onMouseClicked = EventHandler {
             shapeTool.onCreateShape = { x, y -> shapeTool.onCreateRectangle(x, y) }
             shapeTool.onMoveShape = { x, y -> shapeTool.onMoveSquare(x, y) }
+            shapeTool.onReleaseShape = { shapeTool.onReleaseRectangle() }
         }
         val ellipseButton = Button("Ellipse")
         ellipseButton.onMouseClicked = EventHandler {
             shapeTool.onCreateShape = { x, y -> shapeTool.onCreateEllipse(x, y) }
             shapeTool.onMoveShape = { x, y -> shapeTool.onMoveEllipse(x, y) }
+            shapeTool.onReleaseShape = { shapeTool.onReleaseEllipse() }
         }
         val circleButton = Button("Circle")
         circleButton.onMouseClicked = EventHandler {
             shapeTool.onCreateShape = { x, y -> shapeTool.onCreateEllipse(x, y) }
             shapeTool.onMoveShape = { x, y -> shapeTool.onMoveCircle(x, y) }
+            shapeTool.onReleaseShape = { shapeTool.onReleaseEllipse() }
         }
 
         buttonContainer.children.addAll(

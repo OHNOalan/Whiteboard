@@ -27,6 +27,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
     var fillShape = false
     var onCreateShape: (Double, Double) -> Unit = { x, y -> onCreateRectangle(x, y) }
     var onMoveShape: (Double, Double) -> Unit = { x, y -> onMoveRectangle(x, y) }
+    var onReleaseShape: () -> Unit = { onReleaseRectangle() }
 
     fun onCreateRectangle(x: Double, y: Double) {
         rectangle = Rectangle()
@@ -38,7 +39,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         rectangle.translateX = x
         rectangle.translateY = y
         rectangle.userData = EntityIndex.RECTANGLE
-        canvasReference.addDrawnNode(rectangle)
+        canvasReference.children.add(rectangle)
     }
 
     fun onCreateEllipse(x: Double, y: Double) {
@@ -49,7 +50,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         ellipse.centerX = x
         ellipse.centerY = y
         ellipse.userData = EntityIndex.ELLIPSE
-        canvasReference.addDrawnNode(ellipse)
+        canvasReference.children.add(ellipse)
     }
 
     fun onMoveRectangle(x: Double, y: Double, isSquare: Boolean = false) {
@@ -94,11 +95,25 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         onMoveEllipse(x, y, true)
     }
 
+    fun onReleaseRectangle() {
+        canvasReference.children.remove(rectangle)
+        canvasReference.addDrawnNode(rectangle)
+    }
+
+    fun onReleaseEllipse() {
+        canvasReference.children.remove(ellipse)
+        canvasReference.addDrawnNode(ellipse)
+    }
+
     override fun canvasMousePressed(e: MouseEvent) {
         onCreateShape(e.x, e.y)
     }
 
     override fun canvasMouseDragged(e: MouseEvent) {
         onMoveShape(e.x, e.y)
+    }
+
+    override fun canvasMouseReleased(e: MouseEvent) {
+        onReleaseShape()
     }
 }
