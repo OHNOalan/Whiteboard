@@ -11,7 +11,7 @@ val exposed_version: String by project
 val h2_version: String by project
 
 application {
-    mainModule.set("infra")
+    //mainModule.set("infra")
     mainClass.set("whiteboard.ApplicationKt")
 
     val isDevelopment: Boolean = project.ext.has("development")
