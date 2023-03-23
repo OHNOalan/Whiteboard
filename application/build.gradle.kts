@@ -21,6 +21,8 @@ repositories {
 dependencies {
     implementation(project(":shared"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("io.ktor:ktor-client-websockets:2.2.4")
+    implementation("io.ktor:ktor-client-cio:2.2.4")
     testImplementation(kotlin("test"))
 }
 

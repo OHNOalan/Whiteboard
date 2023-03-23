@@ -252,4 +252,12 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         redoStack.clear()
         deselectItemIfSelected()
     }
+
+    // This function is called whenever the server has a change that needs to be
+    // propagated to the clients.
+    fun webUpdateCallback(update: String) {
+        println("In Callback")
+        println(update)
+        // TODO any changes from the server are sent here - need to update canvas
+    }
 }
