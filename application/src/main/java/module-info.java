@@ -10,5 +10,7 @@ module application {
     requires io.ktor.websockets;
     requires io.ktor.client.cio;
     requires io.ktor.utils;
+    requires kotlinx.serialization.core;
+    requires kotlinx.serialization.json;
     exports net.codebot.application;
 }

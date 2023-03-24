@@ -16,10 +16,7 @@ import javafx.scene.image.WritablePixelFormat
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
-import javafx.scene.paint.Paint
-import javafx.scene.shape.Ellipse
-import javafx.scene.shape.Polyline
-import javafx.scene.shape.Rectangle
+import kotlinx.serialization.json.Json
 import net.codebot.application.components.tools.BaseTool
 import net.codebot.application.components.tools.SelectionTool
 import net.codebot.application.components.tools.ToolIndex
@@ -34,7 +31,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     private val tools: MutableList<BaseTool> = mutableListOf()
     private val undoStack: ArrayDeque<Pair<String, Node>> = ArrayDeque()
     private val redoStack: ArrayDeque<Pair<String, Node>> = ArrayDeque()
-    private val drawnItems: MutableList<Node> = mutableListOf()
+    private val drawnItems: MutableMap<String, Node> = mutableMapOf()
     private var selectedTool: Int = 0
     private val scrollPane: ScrollPane = ScrollPane()
     private var backgroundColor = ColorPicker(Color.WHITE)
@@ -85,20 +82,27 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         this.scaleY = 1.0
     }
 
+    // TODO selection tool needs undo and redo
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
-    fun addDrawnNode(node: Node) {
+    fun addDrawnNode(node: Node, broadcast: Boolean = true) {
         addToUndoStack(Pair("Add", node))
-        drawnItems.add(node)
+        drawnItems[(node.userData as NodeData).id] = node
         this.children.add(node)
+        if (broadcast) {
+            AppData.broadcastCreate(listOf(node))
+        }
     }
 
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
-    fun removeDrawnNode(node: Node) {
+    fun removeDrawnNode(node: Node, broadcast: Boolean = true) {
         addToUndoStack(Pair("Remove", node))
-        drawnItems.remove(node)
+        drawnItems.remove((node.userData as NodeData).id)
         this.children.remove(node)
+        if (broadcast) {
+            AppData.broadcastDelete(listOf(node))
+        }
     }
 
     // Upon undo or redo, if an item is selected, it should be deselected
@@ -118,10 +122,27 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             val pixelReader: PixelReader = writableImage.pixelReader
             val buffer: IntBuffer = IntBuffer.allocate(writableImage.width.toInt() * writableImage.height.toInt())
             val pixelFormat: WritablePixelFormat<IntBuffer> = PixelFormat.getIntArgbInstance()
-            pixelReader.getPixels(0, 0, writableImage.width.toInt(), writableImage.height.toInt(), pixelFormat, buffer, writableImage.width.toInt())
+            pixelReader.getPixels(
+                0,
+                0,
+                writableImage.width.toInt(),
+                writableImage.height.toInt(),
+                pixelFormat,
+                buffer,
+                writableImage.width.toInt()
+            )
 
-            val bufferedImage = BufferedImage(writableImage.width.toInt(), writableImage.height.toInt(), BufferedImage.TYPE_INT_ARGB)
-            bufferedImage.setRGB(0 ,0, writableImage.width.toInt(), writableImage.height.toInt(), buffer.array(), 0, writableImage.width.toInt())
+            val bufferedImage =
+                BufferedImage(writableImage.width.toInt(), writableImage.height.toInt(), BufferedImage.TYPE_INT_ARGB)
+            bufferedImage.setRGB(
+                0,
+                0,
+                writableImage.width.toInt(),
+                writableImage.height.toInt(),
+                buffer.array(),
+                0,
+                writableImage.width.toInt()
+            )
 
             ImageIO.write(bufferedImage, "png", File(fileName))
         } catch (ex: IOException) {
@@ -131,81 +152,17 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     }
 
     fun saveFile(): String {
-        var data = ""
-        for (item in drawnItems) {
-            var current = ""
-            if (item.userData == EntityIndex.LINE) {
-                val line = item as Polyline
-                current += EntityIndex.LINE + "|"
-                current += line.stroke.toString() + "|"
-                current += line.strokeWidth.toString() + "|"
-                for (point in line.points) {
-                    current += "$point|"
-                }
-            } else if (item.userData == EntityIndex.RECTANGLE) {
-                val rectangle = item as Rectangle
-                current += EntityIndex.RECTANGLE + "|"
-                current += rectangle.translateX.toString() + "|"
-                current += rectangle.translateY.toString() + "|"
-                current += rectangle.width.toString() + "|"
-                current += rectangle.height.toString() + "|"
-                current += (if (rectangle.fill != null) rectangle.fill.toString() else "null") + "|"
-                current += rectangle.stroke.toString() + "|"
-            } else if (item.userData == EntityIndex.ELLIPSE) {
-                val ellipse = item as Ellipse
-                current += EntityIndex.ELLIPSE + "|"
-                current += ellipse.centerX.toString() + "|"
-                current += ellipse.centerY.toString() + "|"
-                current += ellipse.radiusX.toString() + "|"
-                current += ellipse.radiusY.toString() + "|"
-                current += (if (ellipse.fill != null) ellipse.fill.toString() else "null") + "|"
-                current += ellipse.stroke.toString() + "|"
-            }
-            data += "$current~"
-        }
-        return data
+        return Json.encodeToString(AppEntities.serializer(), AppData.serialize(drawnItems.values.toList()))
     }
 
     fun loadFile(data: String) {
         clearCanvas()
-        for (entity in data.split("~").filter {
-            it.isNotEmpty()
-        }) {
-            val parts = entity.split("|").filter {
-                it.isNotEmpty()
-            }
-            lateinit var node: Node
-            if (parts[0] == EntityIndex.LINE) {
-                val line = Polyline()
-                line.stroke = Paint.valueOf(parts[1])
-                line.strokeWidth = parts[2].toDouble()
-                for (part in parts.drop(3)) {
-                    line.points.add(part.toDouble())
-                }
-                node = line
-            } else if (parts[0] == EntityIndex.RECTANGLE) {
-                val rectangle = Rectangle()
-                rectangle.translateX = parts[1].toDouble()
-                rectangle.translateY = parts[2].toDouble()
-                rectangle.width = parts[3].toDouble()
-                rectangle.height = parts[4].toDouble()
-                rectangle.fill = if (parts[5] == "null") null else Paint.valueOf(parts[5])
-                rectangle.stroke = Paint.valueOf(parts[6])
-                node = rectangle
-            } else if (parts[0] == EntityIndex.ELLIPSE) {
-                val ellipse = Ellipse()
-                ellipse.centerX = parts[1].toDouble()
-                ellipse.centerY = parts[2].toDouble()
-                ellipse.radiusX = parts[3].toDouble()
-                ellipse.radiusY = parts[4].toDouble()
-                ellipse.fill = if (parts[5] == "null") null else Paint.valueOf(parts[5])
-                ellipse.stroke = Paint.valueOf(parts[6])
-                node = ellipse
-            }
-            node.userData = parts[0]
-            drawnItems.add(node)
-            this.children.add(node)
+        val entities = AppData.deserialize(data)
+        for (entity in entities) {
+            drawnItems[(entity.userData as NodeData).id] = entity
         }
+        this.children.addAll(entities)
+        AppData.broadcastCreate(entities)
     }
 
     fun undo() {
@@ -213,10 +170,10 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             deselectItemIfSelected()
             val (undoType, node) = undoStack.removeFirst()
             if (undoType == "Add") {
-                drawnItems.remove(node)
+                drawnItems.remove((node.userData as NodeData).id)
                 this.children.remove(node)
             } else {
-                drawnItems.add(node)
+                drawnItems[(node.userData as NodeData).id] = node
                 this.children.add(node)
             }
             redoStack.addFirst(Pair(undoType, node))
@@ -228,10 +185,10 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             deselectItemIfSelected()
             val (redoType, node) = redoStack.removeFirst()
             if (redoType == "Add") {
-                drawnItems.add(node)
+                drawnItems[(node.userData as NodeData).id] = node
                 this.children.add(node)
             } else {
-                drawnItems.remove(node)
+                drawnItems.remove((node.userData as NodeData).id)
                 this.children.remove(node)
             }
             undoStack.addFirst(Pair(redoType, node))
@@ -254,18 +211,106 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     }
 
     fun clearCanvas() {
-        this.children.removeAll(drawnItems)
-        drawnItems.clear()
+        this.children.removeAll(drawnItems.values)
         undoStack.clear()
         redoStack.clear()
         deselectItemIfSelected()
+        AppData.broadcastDelete(drawnItems.values.toList())
+        drawnItems.clear()
     }
 
+    // TODO potential bug where one user deletes one node but that node still exists on the undo/redo stack
     // This function is called whenever the server has a change that needs to be
     // propagated to the clients.
     fun webUpdateCallback(update: String) {
-        println("In Callback")
-        println(update)
-        // TODO any changes from the server are sent here - need to update canvas
+        val response = Json.decodeFromString(AppResponse.serializer(), update)
+        when (response.operation) {
+            OperationIndex.ADD -> {
+                for (entity in response.entities) {
+                    when (entity.type) {
+                        EntityIndex.LINE -> {
+                            addDrawnNode(
+                                AppData.deserializeLine(
+                                    Json.decodeFromString(
+                                        AppLine.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.RECTANGLE -> {
+                            addDrawnNode(
+                                AppData.deserializeRectangle(
+                                    Json.decodeFromString(
+                                        AppRectangle.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.ELLIPSE -> {
+                            addDrawnNode(
+                                AppData.deserializeEllipse(
+                                    Json.decodeFromString(
+                                        AppEllipse.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+                    }
+                }
+            }
+
+            OperationIndex.DELETE -> {
+                for (entity in response.entities) {
+                    drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
+                }
+            }
+
+            OperationIndex.MODIFY -> {
+                for (entity in response.entities) {
+                    drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
+                }
+                for (entity in response.entities) {
+                    when (entity.type) {
+                        EntityIndex.LINE -> {
+                            addDrawnNode(
+                                AppData.deserializeLine(
+                                    Json.decodeFromString(
+                                        AppLine.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.RECTANGLE -> {
+                            addDrawnNode(
+                                AppData.deserializeRectangle(
+                                    Json.decodeFromString(
+                                        AppRectangle.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.ELLIPSE -> {
+                            addDrawnNode(
+                                AppData.deserializeEllipse(
+                                    Json.decodeFromString(
+                                        AppEllipse.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

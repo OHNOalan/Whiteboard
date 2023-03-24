@@ -6,8 +6,10 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.StrokeLineCap
+import net.codebot.application.components.AppData
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.EntityIndex
+import net.codebot.application.components.NodeData
 import net.codebot.application.components.tools.styles.PenStyles
 
 
@@ -59,7 +61,7 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
                 e.x, e.y
             )
         )
-        currentPolyline.userData = EntityIndex.LINE
+        currentPolyline.userData = NodeData(EntityIndex.LINE, AppData.generateNodeId())
         // We let the current line be a preview only and will only commit if mouse is released
         canvasReference.children.add(currentPolyline)
     }
