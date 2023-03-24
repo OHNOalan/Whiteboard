@@ -8,10 +8,12 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
+import kotlinx.serialization.json.Json
+import whiteboard.AppEntitiesResponse
 import whiteboard.EntityControl
+import whiteboard.OperationIndex
 import whiteboard.UserControl
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.collections.LinkedHashSet
 
 fun Application.configureSockets() {
@@ -23,19 +25,52 @@ fun Application.configureSockets() {
     }
     routing {
         val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
-        webSocket("/chat") {
-            println("Chat route in Sockets.kt")
-            println("Adding user!")
+        webSocket("/sync") {
             val thisConnection = Connection(this)
             connections += thisConnection
             try {
-                send("You are connected! There are ${connections.count()} users here.")
+                val data = Json.encodeToString(
+                    AppEntitiesResponse.serializer(),
+                    AppEntitiesResponse(EntityControl.load(123), OperationIndex.ADD)
+                )
+                println(data)
+                send(data)
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
-                    val textWithUsername = "[${thisConnection.name}]: $receivedText"
-                    connections.forEach {
-                        it.session.send(textWithUsername)
+                    println(receivedText)
+                    val response = Json.decodeFromString(AppEntitiesResponse.serializer(), receivedText)
+                    when (response.operation) {
+                        OperationIndex.ADD -> {
+                            for (entity in response.entities) {
+                                EntityControl.create(
+                                    entity.id, entity.roomId, entity.descriptor, entity.type, entity.timestamp
+                                )
+                            }
+                        }
+
+                        OperationIndex.DELETE -> {
+                            for (entity in response.entities) {
+                                EntityControl.delete(
+                                    entity.id
+                                )
+                            }
+                        }
+
+                        OperationIndex.MODIFY -> {
+                            for (entity in response.entities) {
+                                EntityControl.modify(
+                                    entity.id,
+                                    entity.descriptor
+                                )
+                            }
+                        }
+                    }
+                    for (connection in connections) {
+                        if (connection != thisConnection) {
+                            println("Sending...")
+                            connection.session.send(receivedText)
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -46,7 +81,6 @@ fun Application.configureSockets() {
                 connections -= thisConnection
             }
         }
-
 
         // API calls below
 
@@ -95,33 +129,43 @@ fun Application.configureSockets() {
                 formParameters.getOrFail<String>("id"),
                 formParameters.getOrFail<Int>("roomId"),
                 formParameters.getOrFail<String>("descriptor"),
+                formParameters.getOrFail<String>("type"),
                 formParameters.getOrFail<Long>("timestamp")
             )
-            call.respondText { if (entity != null) "+" else "-" }
+            if (entity != null) {
+                connections.forEach {
+                    it.session.send(
+                        Json.encodeToString(
+                            AppEntitiesResponse.serializer(),
+                            AppEntitiesResponse(
+                                listOf(entity),
+                                OperationIndex.ADD
+                            )
+                        )
+                    )
+                }
+                call.respondText { "+" }
+            } else {
+                call.respondText { "-" }
+            }
         }
         post("/entity/load") {
             val formParameters = call.receiveParameters()
-            call.respondText { EntityControl.load(formParameters.getOrFail<Int>("roomId")) }
+            call.respondText {
+                Json.encodeToString(
+                    AppEntitiesResponse.serializer(),
+                    AppEntitiesResponse(EntityControl.load(formParameters.getOrFail<Int>("roomId")), OperationIndex.ADD)
+                )
+            }
         }
         post("/entity/delete") {
             val formParameters = call.receiveParameters()
             call.respondText { if (EntityControl.delete(formParameters.getOrFail<String>("id"))) "+" else "-" }
         }
-        post("/entity/update") {
-            // TODO implement this for list of items
-            val formParameters = call.receiveParameters()
-            call.respondText { if (EntityControl.delete(formParameters.getOrFail<String>("id"))) "+" else "-" }
-        }
     }
 }
 
-
-class Connection(val session: DefaultWebSocketSession) {
-    companion object {
-        val lastId= AtomicInteger(0)
-    }
-    val name = "user${lastId.getAndIncrement()}"
-}
+class Connection(val session: DefaultWebSocketSession)
 
 
 

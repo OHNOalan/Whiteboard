@@ -4,8 +4,12 @@ import javafx.scene.Node
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
+import javafx.scene.shape.Ellipse
+import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
-import kotlinx.coroutines.selects.select
+import net.codebot.application.components.AppData
+import net.codebot.application.components.EntityIndex
+import net.codebot.application.components.NodeData
 import net.codebot.application.components.AppStylebar
 import kotlin.math.abs
 import kotlin.math.max
@@ -106,15 +110,15 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             canvasReference.children.remove(selectedRectangle)
             corners.forEach { canvasReference.children.remove(it) }
 
-        // re-enable texteditor nodes
-        if(editing) {
-            selectedNodes.map {
-                if (it is TextEditor) {
-                    it.isDisable = true
+            // re-enable texteditor nodes
+            if (editing) {
+                selectedNodes.map {
+                    if (it is TextEditor) {
+                        it.isDisable = true
+                    }
                 }
+                editing = false
             }
-            editing = false
-        }
 
             selectedNodes.clear()
             itemIsSelected = false
@@ -163,7 +167,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
 
             moveX = e.x
             moveY = e.y
-        } else if (!editing){
+        } else if (!editing) {
             onResizeShape(e.x, e.y)
         }
     }
@@ -172,18 +176,18 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
         // only create selected box if we're not moving a selection already
         // when not moving, if selecting area is too small,
         // we start editing state
-        if(moving) {
+        if (moving) {
             moving = false
         }
         // if editing, when clicking everywhere else, stop editing
-        else if(editing) {
+        else if (editing) {
             editNode.isDisable = true
             editNode.style = "-fx-background-color: transparent;"
             editing = false
             selectedNodes.clear()
         } else {
             // if not editing determine whether edit or selecting
-            if(abs(e.x - startX) < 10 && abs(e.y - startY) < 10) {
+            if (abs(e.x - startX) < 10 && abs(e.y - startY) < 10) {
                 for (node in canvasReference.children) {
                     // only able to edit Text for now
                     if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent) && node is TextEditor) {
@@ -191,7 +195,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                     }
                 }
                 // get the topmost text and make if modifiable
-                if(selectedNodes.isNotEmpty()) {
+                if (selectedNodes.isNotEmpty()) {
                     editNode = selectedNodes.last()
                     editNode.isDisable = false
                     editNode.style = "-fx-background-color: " + selectionLineColor + ";"
@@ -265,6 +269,33 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             }
         }
         canvasReference.children.remove(selectionRectangle)
+        if (selectedNodes.isNotEmpty()) {
+            for (node in selectedNodes) {
+                when ((node.userData as NodeData).type) {
+                    EntityIndex.LINE -> {
+                        val line = node as Polyline
+                        for (i in line.points.indices) {
+                            if (i % 2 == 0) {
+                                line.points[i] += line.translateX
+                            } else {
+                                line.points[i] += line.translateY
+                            }
+                        }
+                        line.translateX = 0.0
+                        line.translateY = 0.0
+                    }
+
+                    EntityIndex.ELLIPSE -> {
+                        val ellipse = node as Ellipse
+                        ellipse.centerX += ellipse.translateX
+                        ellipse.centerY += ellipse.translateY
+                        ellipse.translateX = 0.0
+                        ellipse.translateY = 0.0
+                    }
+                }
+            }
+            AppData.broadcastModify(selectedNodes)
+        }
     }
 
     override fun onDeselectTool() {

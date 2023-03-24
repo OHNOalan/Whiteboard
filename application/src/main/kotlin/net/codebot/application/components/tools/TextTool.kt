@@ -4,6 +4,9 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
+import net.codebot.application.components.AppData
+import net.codebot.application.components.EntityIndex
+import net.codebot.application.components.NodeData
 
 class TextTool(container: HBox) : BaseTool(
     container,
@@ -82,6 +85,7 @@ class TextTool(container: HBox) : BaseTool(
             initY = e.y
         }
         val editor = TextEditor(initX, initY, width, height)
+        editor.userData = NodeData(EntityIndex.TEXT, AppData.generateNodeId())
         canvasReference.addDrawnNode(editor)
         onRemoveSelection()
     }

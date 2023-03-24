@@ -7,7 +7,10 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
+import io.ktor.websocket.*
+import javafx.application.Platform
 import kotlinx.coroutines.*
+import net.codebot.application.components.AppData
 import java.util.concurrent.Executors
 
 
@@ -26,23 +29,25 @@ class Main : Application() {
         stage.maxWidth = 1600.0
 
         val appLayout = AppLayout(stage)
-        // TODO update host and path accordingly
         val webSocketThread = GlobalScope.launch {
             runBlocking {
                 client.webSocket(
                     method = HttpMethod.Get,
                     host = "0.0.0.0",
-                    path = "/chat",
+                    path = "/sync",
                     port = 8080,
                     request = {
                         // Set WebSocket headers or options if needed
                     }
                 ) {
+                    AppData.registerSocket(this)
                     // Called when a message is received from the WebSocket
-                    for (message in incoming) {
-                        println("Received message")
-                        println(message.toString())
-                        appLayout.appCanvas.webUpdateCallback(message.toString())
+                    for (frame in incoming) {
+                        val update = (frame as Frame.Text).readText()
+                        println(update)
+                        Platform.runLater() {
+                            appLayout.appCanvas.webUpdateCallback(update)
+                        }
                     }
                 }
             }
@@ -50,7 +55,6 @@ class Main : Application() {
 
         Runtime.getRuntime().addShutdownHook(object : Thread() {
             override fun run() {
-                println("shutdown hook called")
                 // When the app is about to close, stop the other thread
                 webSocketThread.cancel()
             }
