@@ -7,6 +7,8 @@ import javafx.scene.Node
 import javafx.scene.control.ColorPicker
 import javafx.scene.control.ScrollPane
 import javafx.scene.image.Image
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
 import javafx.scene.image.PixelFormat
 import javafx.scene.image.PixelReader
 import javafx.scene.image.WritableImage
@@ -26,6 +28,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.IntBuffer
 import javax.imageio.ImageIO
+
 
 class AppCanvas(borderPane: BorderPane) : Pane() {
     private val tools: MutableList<BaseTool> = mutableListOf()
@@ -51,6 +54,11 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         }
         this.onMouseMoved = EventHandler { e: MouseEvent ->
             tools[selectedTool].canvasMouseMoved(e)
+        }
+        this.addEventFilter(KeyEvent.KEY_PRESSED) { event ->
+            if (event.code == KeyCode.SPACE) {
+                event.consume()
+            }
         }
         scrollPane.content = this
         borderPane.center = scrollPane
