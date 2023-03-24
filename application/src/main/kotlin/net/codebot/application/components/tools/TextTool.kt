@@ -61,6 +61,7 @@ class TextTool(container: HBox) : BaseTool(
     }
 
     private fun onRemoveRectangle(rectangle: Rectangle) {
+        canvasReference.children.remove(rectangle)
         rectangle.isVisible = false
     }
     override fun canvasMousePressed(e: MouseEvent) {
@@ -84,10 +85,10 @@ class TextTool(container: HBox) : BaseTool(
             height = initY - e.y
             initY = e.y
         }
+        onRemoveSelection()
         val editor = TextEditor(initX, initY, width, height)
         editor.userData = NodeData(EntityIndex.TEXT, AppData.generateNodeId())
         canvasReference.addDrawnNode(editor)
-        onRemoveSelection()
     }
     override fun canvasMouseDragged(e: MouseEvent) {
         onResizeSelection(e.x, e.y)
