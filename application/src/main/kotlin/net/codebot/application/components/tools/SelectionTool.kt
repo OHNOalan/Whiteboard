@@ -1,15 +1,17 @@
 package net.codebot.application.components.tools
 
 import javafx.scene.Node
-import javafx.scene.control.TextArea
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
+import kotlinx.coroutines.selects.select
+import net.codebot.application.components.AppStylebar
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-class SelectionTool(container: HBox) : BaseTool(
+class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/selection.png",
     "file:src/main/assets/cursors/selection.png",
@@ -22,8 +24,11 @@ class SelectionTool(container: HBox) : BaseTool(
     private lateinit var selectedRectangle: Rectangle
     private var itemIsSelected = false
     private var moving = false
+    private var editing = false
     private var corners = listOf<Rectangle>()
     private val selectedNodes = mutableListOf<Node>()
+    private lateinit var editNode: Node
+    private var textControlContainer: HBox = HBox()
 
     private var startX = 0.0
     private var startY = 0.0
@@ -37,6 +42,14 @@ class SelectionTool(container: HBox) : BaseTool(
 
     private val lineWidth: Double = 2.0
     private val cornerRectangleSize: Double = 11.0
+
+    init {
+        textControlContainer.prefWidth = 200.0
+        textControlContainer.prefHeight = 100.0
+        textControlContainer.style = ("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+                + "-fx-border-width: 2;" + "-fx-border-insets: 5;"
+                + "-fx-border-radius: 5;" + "-fx-border-color: blue;")
+    }
 
     val onCreateShape: (Double, Double) -> Unit =
         { x, y -> selectionRectangle = onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0) }
@@ -93,12 +106,15 @@ class SelectionTool(container: HBox) : BaseTool(
             canvasReference.children.remove(selectedRectangle)
             corners.forEach { canvasReference.children.remove(it) }
 
-            // re-enable textarea nodes
+        // re-enable texteditor nodes
+        if(editing) {
             selectedNodes.map {
-                if (it is TextArea) {
-                    it.isDisable = false
+                if (it is TextEditor) {
+                    it.isDisable = true
                 }
             }
+            editing = false
+        }
 
             selectedNodes.clear()
             itemIsSelected = false
@@ -147,81 +163,108 @@ class SelectionTool(container: HBox) : BaseTool(
 
             moveX = e.x
             moveY = e.y
-        } else {
+        } else if (!editing){
             onResizeShape(e.x, e.y)
         }
     }
 
     override fun canvasMouseReleased(e: MouseEvent) {
         // only create selected box if we're not moving a selection already
-        if (!moving) {
-            var minX = Double.POSITIVE_INFINITY
-            var minY = Double.POSITIVE_INFINITY
-            var maxX = 0.0
-            var maxY = 0.0
-
-            for (node in canvasReference.children) {
-                if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent)) {
-                    selectedNodes.add(node)
-                    if (node is TextArea) {
-                        node.isDisable = true
+        // when not moving, if selecting area is too small,
+        // we start editing state
+        if(moving) {
+            moving = false
+        }
+        // if editing, when clicking everywhere else, stop editing
+        else if(editing) {
+            editNode.isDisable = true
+            editNode.style = "-fx-background-color: transparent;"
+            editing = false
+            selectedNodes.clear()
+        } else {
+            // if not editing determine whether edit or selecting
+            if(abs(e.x - startX) < 10 && abs(e.y - startY) < 10) {
+                for (node in canvasReference.children) {
+                    // only able to edit Text for now
+                    if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent) && node is TextEditor) {
+                        selectedNodes.add(node)
                     }
+                }
+                // get the topmost text and make if modifiable
+                if(selectedNodes.isNotEmpty()) {
+                    editNode = selectedNodes.last()
+                    editNode.isDisable = false
+                    editNode.style = "-fx-background-color: " + selectionLineColor + ";"
+                    editing = true
+                }
+            } else {
+                var minX = Double.POSITIVE_INFINITY
+                var minY = Double.POSITIVE_INFINITY
+                var maxX = 0.0
+                var maxY = 0.0
 
-                    val nodeBounds = node.boundsInParent
+                for (node in canvasReference.children) {
+                    if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent)) {
+                        selectedNodes.add(node)
+                        if (node is TextEditor) {
+                            node.isDisable = true
+                        }
 
-                    minX = min(minX, nodeBounds.minX)
-                    minY = min(minY, nodeBounds.minY)
-                    maxX = max(maxX, nodeBounds.maxX)
-                    maxY = max(maxY, nodeBounds.maxY)
+                        val nodeBounds = node.boundsInParent
+
+                        minX = min(minX, nodeBounds.minX)
+                        minY = min(minY, nodeBounds.minY)
+                        maxX = max(maxX, nodeBounds.maxX)
+                        maxY = max(maxY, nodeBounds.maxY)
+                    }
+                }
+
+                if (selectedNodes.isNotEmpty()) {
+                    itemIsSelected = true
+                    selectedRectangle = onCreateRectangle(minX - lineWidth / 2, minY - lineWidth / 2, selectedLineColor)
+                    onResizeRectangle(selectedRectangle, maxX + lineWidth / 2, maxY + lineWidth / 2)
+
+                    val topLeftCorner =
+                        onCreateRectangle(
+                            minX - cornerRectangleSize / 2,
+                            minY - cornerRectangleSize / 2,
+                            cornerLineColor,
+                            fill = cornerLineFill
+                        )
+                    onResizeRectangle(topLeftCorner, minX + cornerRectangleSize / 2, minY + cornerRectangleSize / 2)
+
+                    val topRightCorner =
+                        onCreateRectangle(
+                            maxX - cornerRectangleSize / 2,
+                            minY - cornerRectangleSize / 2,
+                            cornerLineColor,
+                            fill = cornerLineFill
+                        )
+                    onResizeRectangle(topRightCorner, maxX + cornerRectangleSize / 2, minY + cornerRectangleSize / 2)
+
+                    val bottomRightCorner =
+                        onCreateRectangle(
+                            maxX - cornerRectangleSize / 2,
+                            maxY - cornerRectangleSize / 2,
+                            cornerLineColor,
+                            fill = cornerLineFill
+                        )
+                    onResizeRectangle(bottomRightCorner, maxX + cornerRectangleSize / 2, maxY + cornerRectangleSize / 2)
+
+                    val bottomLeftCorner =
+                        onCreateRectangle(
+                            minX - cornerRectangleSize / 2,
+                            maxY - cornerRectangleSize / 2,
+                            cornerLineColor,
+                            fill = cornerLineFill
+                        )
+                    onResizeRectangle(bottomLeftCorner, minX + cornerRectangleSize / 2, maxY + cornerRectangleSize / 2)
+
+                    corners = listOf(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner)
                 }
             }
-            canvasReference.children.remove(selectionRectangle)
-
-            if (selectedNodes.isNotEmpty()) {
-                itemIsSelected = true
-                selectedRectangle = onCreateRectangle(minX - lineWidth / 2, minY - lineWidth / 2, selectedLineColor)
-                onResizeRectangle(selectedRectangle, maxX + lineWidth / 2, maxY + lineWidth / 2)
-
-                val topLeftCorner =
-                    onCreateRectangle(
-                        minX - cornerRectangleSize / 2,
-                        minY - cornerRectangleSize / 2,
-                        cornerLineColor,
-                        fill = cornerLineFill
-                    )
-                onResizeRectangle(topLeftCorner, minX + cornerRectangleSize / 2, minY + cornerRectangleSize / 2)
-
-                val topRightCorner =
-                    onCreateRectangle(
-                        maxX - cornerRectangleSize / 2,
-                        minY - cornerRectangleSize / 2,
-                        cornerLineColor,
-                        fill = cornerLineFill
-                    )
-                onResizeRectangle(topRightCorner, maxX + cornerRectangleSize / 2, minY + cornerRectangleSize / 2)
-
-                val bottomRightCorner =
-                    onCreateRectangle(
-                        maxX - cornerRectangleSize / 2,
-                        maxY - cornerRectangleSize / 2,
-                        cornerLineColor,
-                        fill = cornerLineFill
-                    )
-                onResizeRectangle(bottomRightCorner, maxX + cornerRectangleSize / 2, maxY + cornerRectangleSize / 2)
-
-                val bottomLeftCorner =
-                    onCreateRectangle(
-                        minX - cornerRectangleSize / 2,
-                        maxY - cornerRectangleSize / 2,
-                        cornerLineColor,
-                        fill = cornerLineFill
-                    )
-                onResizeRectangle(bottomLeftCorner, minX + cornerRectangleSize / 2, maxY + cornerRectangleSize / 2)
-
-                corners = listOf(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner)
-            }
         }
-        moving = false
+        canvasReference.children.remove(selectionRectangle)
     }
 
     override fun onDeselectTool() {

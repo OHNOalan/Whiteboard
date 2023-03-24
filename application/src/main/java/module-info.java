@@ -3,6 +3,7 @@ module application {
     requires javafx.controls;
     requires kotlinx.coroutines.core.jvm;
     requires shared;
+    requires javafx.web;
     requires java.desktop;
     requires io.ktor.client.core;
     requires io.ktor.http;

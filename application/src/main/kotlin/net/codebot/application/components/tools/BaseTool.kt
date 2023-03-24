@@ -10,7 +10,7 @@ import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.tools.styles.BaseStyles
 
 abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: String, buttonText: String, private val toolId: Int) {
-    private var cursorImage : Image = Image(cursorImageUrl, 32.0, 32.0, true, true)
+    private val cursorImage : Image = Image(cursorImageUrl, 32.0, 32.0, true, true)
     protected lateinit var canvasReference : AppCanvas
     protected open val stylesControl : BaseStyles? = null
 
