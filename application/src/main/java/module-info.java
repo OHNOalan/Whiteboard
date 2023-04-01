@@ -12,5 +12,6 @@ module application {
     requires io.ktor.utils;
     requires kotlinx.serialization.core;
     requires kotlinx.serialization.json;
+    requires java.prefs;
     exports net.codebot.application;
 }
