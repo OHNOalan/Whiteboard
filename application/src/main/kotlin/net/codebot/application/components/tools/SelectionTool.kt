@@ -48,14 +48,19 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
     init {
         textControlContainer.prefWidth = 200.0
         textControlContainer.prefHeight = 100.0
-        textControlContainer.style = ("-fx-padding: 10;" + "-fx-border-style: solid inside;"
-                + "-fx-border-width: 2;" + "-fx-border-insets: 5;"
-                + "-fx-border-radius: 5;" + "-fx-border-color: blue;")
+        textControlContainer.style =
+            ("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+                    + "-fx-border-width: 2;" + "-fx-border-insets: 5;"
+                    + "-fx-border-radius: 5;" + "-fx-border-color: blue;")
     }
 
     val onCreateShape: (Double, Double) -> Unit =
-        { x, y -> selectionRectangle = onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0) }
-    val onResizeShape: (Double, Double) -> Unit = { x, y -> onResizeRectangle(selectionRectangle, x, y) }
+        { x, y ->
+            selectionRectangle =
+                onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0)
+        }
+    val onResizeShape: (Double, Double) -> Unit =
+        { x, y -> onResizeRectangle(selectionRectangle, x, y) }
 
     private fun onCreateRectangle(
         x: Double,
@@ -188,7 +193,10 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             if (abs(e.x - startX) < 10 && abs(e.y - startY) < 10) {
                 for (node in canvasReference.children) {
                     // only able to edit Text for now
-                    if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent) && node is AppTextEditor) {
+                    if (node != selectionRectangle && node.boundsInParent.intersects(
+                            selectionRectangle.boundsInParent
+                        ) && node is AppTextEditor
+                    ) {
                         selectedNodes.add(node)
                     }
                 }
@@ -196,7 +204,9 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 if (selectedNodes.isNotEmpty()) {
                     editNode = selectedNodes.last()
                     editNode.isDisable = false
-                    editNode.style = "-fx-background-color: " + selectionLineColor + ";"
+                    editNode.style =
+                        "-fx-background-color: " + selectionLineColor.toString()
+                            .replace("0x", "#") + ";"
                     editing = true
                 }
             } else {
@@ -206,7 +216,10 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 var maxY = 0.0
 
                 for (node in canvasReference.children) {
-                    if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent)) {
+                    if (node != selectionRectangle && node.boundsInParent.intersects(
+                            selectionRectangle.boundsInParent
+                        )
+                    ) {
                         selectedNodes.add(node)
                         if (node is AppTextEditor) {
                             node.isDisable = true
@@ -223,8 +236,16 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
 
                 if (selectedNodes.isNotEmpty()) {
                     itemIsSelected = true
-                    selectedRectangle = onCreateRectangle(minX - lineWidth / 2, minY - lineWidth / 2, selectedLineColor)
-                    onResizeRectangle(selectedRectangle, maxX + lineWidth / 2, maxY + lineWidth / 2)
+                    selectedRectangle = onCreateRectangle(
+                        minX - lineWidth / 2,
+                        minY - lineWidth / 2,
+                        selectedLineColor
+                    )
+                    onResizeRectangle(
+                        selectedRectangle,
+                        maxX + lineWidth / 2,
+                        maxY + lineWidth / 2
+                    )
 
                     val topLeftCorner =
                         onCreateRectangle(
@@ -233,7 +254,11 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(topLeftCorner, minX + cornerRectangleSize / 2, minY + cornerRectangleSize / 2)
+                    onResizeRectangle(
+                        topLeftCorner,
+                        minX + cornerRectangleSize / 2,
+                        minY + cornerRectangleSize / 2
+                    )
 
                     val topRightCorner =
                         onCreateRectangle(
@@ -242,7 +267,11 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(topRightCorner, maxX + cornerRectangleSize / 2, minY + cornerRectangleSize / 2)
+                    onResizeRectangle(
+                        topRightCorner,
+                        maxX + cornerRectangleSize / 2,
+                        minY + cornerRectangleSize / 2
+                    )
 
                     val bottomRightCorner =
                         onCreateRectangle(
@@ -251,7 +280,11 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(bottomRightCorner, maxX + cornerRectangleSize / 2, maxY + cornerRectangleSize / 2)
+                    onResizeRectangle(
+                        bottomRightCorner,
+                        maxX + cornerRectangleSize / 2,
+                        maxY + cornerRectangleSize / 2
+                    )
 
                     val bottomLeftCorner =
                         onCreateRectangle(
@@ -260,15 +293,28 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(bottomLeftCorner, minX + cornerRectangleSize / 2, maxY + cornerRectangleSize / 2)
+                    onResizeRectangle(
+                        bottomLeftCorner,
+                        minX + cornerRectangleSize / 2,
+                        maxY + cornerRectangleSize / 2
+                    )
 
-                    corners = listOf(topLeftCorner, topRightCorner, bottomRightCorner, bottomLeftCorner)
+                    corners = listOf(
+                        topLeftCorner,
+                        topRightCorner,
+                        bottomRightCorner,
+                        bottomLeftCorner
+                    )
                 }
             }
         }
         canvasReference.children.remove(selectionRectangle)
         if (selectedNodes.isNotEmpty()) {
+            val modifiedNodes = mutableListOf<Node>()
             for (node in selectedNodes) {
+                if (node.translateX == 0.0 && node.translateY == 0.0) {
+                    continue
+                }
                 when ((node.userData as NodeData).type) {
                     EntityIndex.LINE -> {
                         val line = node as Polyline
@@ -301,8 +347,9 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                         segment.translateY = 0.0
                     }
                 }
+                modifiedNodes.add(node)
             }
-            AppData.broadcastModify(selectedNodes)
+            AppData.broadcastModify(modifiedNodes)
         }
     }
 

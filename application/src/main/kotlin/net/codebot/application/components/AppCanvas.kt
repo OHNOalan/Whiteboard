@@ -39,7 +39,13 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     init {
         this.prefHeight = 1200.0
         this.prefWidth = 1600.0
-        this.background = Background(BackgroundFill(backgroundColor.value, CornerRadii.EMPTY, Insets.EMPTY))
+        this.background = Background(
+            BackgroundFill(
+                backgroundColor.value,
+                CornerRadii.EMPTY,
+                Insets.EMPTY
+            )
+        )
         this.onMousePressed = EventHandler { e: MouseEvent ->
             tools[selectedTool].canvasMousePressed(e)
         }
@@ -82,6 +88,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         this.scaleY = 1.0
     }
 
+    // TODO sort by timestamp added
     // TODO selection tool needs undo and redo
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
@@ -90,7 +97,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         drawnItems[(node.userData as NodeData).id] = node
         this.children.add(node)
         if (broadcast) {
-            AppData.broadcastCreate(listOf(node))
+            AppData.broadcastAdd(listOf(node))
         }
     }
 
@@ -116,12 +123,15 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
 
     fun exportCanvas(fileName: String) {
         try {
-            val writableImage = WritableImage(this.prefWidth.toInt(), this.prefHeight.toInt())
+            val writableImage =
+                WritableImage(this.prefWidth.toInt(), this.prefHeight.toInt())
             this.snapshot(null, writableImage)
 
             val pixelReader: PixelReader = writableImage.pixelReader
-            val buffer: IntBuffer = IntBuffer.allocate(writableImage.width.toInt() * writableImage.height.toInt())
-            val pixelFormat: WritablePixelFormat<IntBuffer> = PixelFormat.getIntArgbInstance()
+            val buffer: IntBuffer =
+                IntBuffer.allocate(writableImage.width.toInt() * writableImage.height.toInt())
+            val pixelFormat: WritablePixelFormat<IntBuffer> =
+                PixelFormat.getIntArgbInstance()
             pixelReader.getPixels(
                 0,
                 0,
@@ -133,7 +143,11 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             )
 
             val bufferedImage =
-                BufferedImage(writableImage.width.toInt(), writableImage.height.toInt(), BufferedImage.TYPE_INT_ARGB)
+                BufferedImage(
+                    writableImage.width.toInt(),
+                    writableImage.height.toInt(),
+                    BufferedImage.TYPE_INT_ARGB
+                )
             bufferedImage.setRGB(
                 0,
                 0,
@@ -152,17 +166,17 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     }
 
     fun saveFile(): String {
-        return Json.encodeToString(AppEntities.serializer(), AppData.serialize(drawnItems.values.toList()))
+        return AppData.serializeLocal(drawnItems.values.toList())
     }
 
     fun loadFile(data: String) {
         clearCanvas()
-        val entities = AppData.deserialize(data)
+        val entities = AppData.deserializeLocal(data)
         for (entity in entities) {
             drawnItems[(entity.userData as NodeData).id] = entity
         }
         this.children.addAll(entities)
-        AppData.broadcastCreate(entities)
+        AppData.broadcastAdd(entities)
     }
 
     fun undo() {
@@ -223,136 +237,30 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     // This function is called whenever the server has a 
     // change that needs to be propagated to the clients.
     fun webUpdateCallback(update: String) {
-        val response = Json.decodeFromString(AppResponse.serializer(), update)
-        when (response.operation) {
+        val updateJson = Json.decodeFromString(AppEntitiesSchema.serializer(), update)
+        when (updateJson.operation) {
             OperationIndex.ADD -> {
-                for (entity in response.entities) {
-                    when (entity.type) {
-                        EntityIndex.LINE -> {
-                            addDrawnNode(
-                                AppData.deserializeLine(
-                                    Json.decodeFromString(
-                                        AppLine.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.RECTANGLE -> {
-                            addDrawnNode(
-                                AppData.deserializeRectangle(
-                                    Json.decodeFromString(
-                                        AppRectangle.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.ELLIPSE -> {
-                            addDrawnNode(
-                                AppData.deserializeEllipse(
-                                    Json.decodeFromString(
-                                        AppEllipse.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.TEXT -> {
-                            addDrawnNode(
-                                AppData.deserializeText(
-                                    Json.decodeFromString(
-                                        AppText.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.SEGMENT -> {
-                            addDrawnNode(
-                                AppData.deserializeSegment(
-                                    Json.decodeFromString(
-                                        AppSegment.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-                    }
+                for (node in updateJson.entities.map {
+                    AppData.deserializeSingle(it, it.id)
+                }) {
+                    addDrawnNode(node, false)
                 }
             }
 
             OperationIndex.DELETE -> {
-                for (entity in response.entities) {
+                for (entity in updateJson.entities) {
                     drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
                 }
             }
 
             OperationIndex.MODIFY -> {
-                for (entity in response.entities) {
+                for (entity in updateJson.entities) {
                     drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
                 }
-                for (entity in response.entities) {
-                    when (entity.type) {
-                        EntityIndex.LINE -> {
-                            addDrawnNode(
-                                AppData.deserializeLine(
-                                    Json.decodeFromString(
-                                        AppLine.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.RECTANGLE -> {
-                            addDrawnNode(
-                                AppData.deserializeRectangle(
-                                    Json.decodeFromString(
-                                        AppRectangle.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.ELLIPSE -> {
-                            addDrawnNode(
-                                AppData.deserializeEllipse(
-                                    Json.decodeFromString(
-                                        AppEllipse.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.TEXT -> {
-                            addDrawnNode(
-                                AppData.deserializeText(
-                                    Json.decodeFromString(
-                                        AppText.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-
-                        EntityIndex.SEGMENT -> {
-                            addDrawnNode(
-                                AppData.deserializeSegment(
-                                    Json.decodeFromString(
-                                        AppSegment.serializer(),
-                                        entity.descriptor
-                                    ), entity.id
-                                ), false
-                            )
-                        }
-                    }
+                for (node in updateJson.entities.map {
+                    AppData.deserializeSingle(it, it.id)
+                }) {
+                    addDrawnNode(node, false)
                 }
             }
         }

@@ -4,7 +4,12 @@ import javafx.beans.value.ChangeListener
 import javafx.scene.web.HTMLEditor
 import kotlin.math.max
 
-class AppTextEditor(initX: Double, initY: Double, private var defWidth: Double, private var defHeight: Double) :
+class AppTextEditor(
+    initX: Double,
+    initY: Double,
+    private var defWidth: Double,
+    private var defHeight: Double,
+) :
     HTMLEditor() {
     init {
         this.translateX = initX
@@ -29,6 +34,7 @@ class AppTextEditor(initX: Double, initY: Double, private var defWidth: Double, 
             } else {
                 // HTMLEditor has lost focus
                 hideToolBar()
+                AppData.broadcastModify(listOf(this))
             }
         }
         editable.focusedProperty().addListener(listener)
