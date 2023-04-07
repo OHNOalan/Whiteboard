@@ -14,7 +14,7 @@ import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.ShapeTool
 
 
-class ShapeStyles(styleBar: AppStylebar, shapeTool : ShapeTool) : BaseStyles(styleBar) {
+class ShapeStyles(styleBar: AppStylebar, shapeTool: ShapeTool) : BaseStyles(styleBar) {
     init {
         val colorPickerContainer = HBox()
         val colorPicker = ColorPicker()

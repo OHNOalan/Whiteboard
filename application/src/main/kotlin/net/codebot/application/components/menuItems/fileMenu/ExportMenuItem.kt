@@ -19,8 +19,8 @@ class ExportMenuItem(menu: Menu, canvas: AppCanvas) :
     override fun onItemClicked(e: ActionEvent) {
         if (exportPath == null) {
             val fileChooser = FileChooser()
-            fileChooser.title = "Save As"
-            fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter("Image", "*.png"))
+            fileChooser.title = "Export As"
+            fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter("PNG", "*.png"))
             val selectedFile = fileChooser.showSaveDialog(null)
             if (selectedFile != null) {
                 exportPath = selectedFile.path

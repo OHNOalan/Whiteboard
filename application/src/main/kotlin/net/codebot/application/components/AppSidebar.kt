@@ -25,17 +25,24 @@ class AppSidebar(borderPane: BorderPane, appCanvas: AppCanvas, appLayout: AppLay
         logoutButton.onMouseReleased = EventHandler {
             appLayout.logout()
         }
-        val usernameText = Text(appLayout.getUsername())
+        val usernameText = Text("User: " + appLayout.getUsername())
         usernameText.font = (Font.font("System", FontWeight.NORMAL, 20.0))
-        val usernameContainer = HBox(usernameText, logoutButton)
-        usernameContainer.padding = Insets(15.0, 0.0, 0.0, 35.0)
-        usernameContainer.spacing = 20.0
-        sideBar.children.add(usernameContainer)
+        val usernameContainer = HBox(AppUtils.createHSpacer(),usernameText, AppUtils.createHSpacer(), logoutButton, AppUtils.createHSpacer())
+        sideBar.children.addAll(
+            AppUtils.createVSpacer(),
+            usernameContainer,
+            AppUtils.createVSpacer(),
+            AppUtils.createSeparator(),
+            AppUtils.createVSpacer()
+        )
 
         AppToolbar(sideBar, appCanvas, styleBar)
-        val separator = Separator()
-        separator.halignment = HPos.CENTER
-        sideBar.children.addAll(AppUtils.createVSpacer(), separator, AppUtils.createVSpacer(), styleBar)
+        sideBar.children.addAll(
+            AppUtils.createVSpacer(),
+            AppUtils.createSeparator(),
+            AppUtils.createVSpacer(),
+            styleBar
+        )
         sideBar.children.add(AppUtils.createVSpacer())
         borderPane.left = sideBar
     }

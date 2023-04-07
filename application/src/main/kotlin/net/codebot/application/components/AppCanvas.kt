@@ -220,8 +220,8 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     }
 
     // TODO potential bug where one user deletes one node but that node still exists on the undo/redo stack
-    // This function is called whenever the server has a change that needs to be
-    // propagated to the clients.
+    // This function is called whenever the server has a 
+    // change that needs to be propagated to the clients.
     fun webUpdateCallback(update: String) {
         val response = Json.decodeFromString(AppResponse.serializer(), update)
         when (response.operation) {
@@ -255,6 +255,28 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
                                 AppData.deserializeEllipse(
                                     Json.decodeFromString(
                                         AppEllipse.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.TEXT -> {
+                            addDrawnNode(
+                                AppData.deserializeText(
+                                    Json.decodeFromString(
+                                        AppText.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.SEGMENT -> {
+                            addDrawnNode(
+                                AppData.deserializeSegment(
+                                    Json.decodeFromString(
+                                        AppSegment.serializer(),
                                         entity.descriptor
                                     ), entity.id
                                 ), false
@@ -303,6 +325,28 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
                                 AppData.deserializeEllipse(
                                     Json.decodeFromString(
                                         AppEllipse.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.TEXT -> {
+                            addDrawnNode(
+                                AppData.deserializeText(
+                                    Json.decodeFromString(
+                                        AppText.serializer(),
+                                        entity.descriptor
+                                    ), entity.id
+                                ), false
+                            )
+                        }
+
+                        EntityIndex.SEGMENT -> {
+                            addDrawnNode(
+                                AppData.deserializeSegment(
+                                    Json.decodeFromString(
+                                        AppSegment.serializer(),
                                         entity.descriptor
                                     ), entity.id
                                 ), false

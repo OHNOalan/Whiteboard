@@ -1,14 +1,15 @@
-package net.codebot.application.components.tools
+package net.codebot.application.components
 
 import javafx.beans.value.ChangeListener
 import javafx.scene.web.HTMLEditor
 import kotlin.math.max
 
-class TextEditor(initX: Double, initY: Double, private var defWidth: Double, private var defHeight: Double) : HTMLEditor() {
+class AppTextEditor(initX: Double, initY: Double, private var defWidth: Double, private var defHeight: Double) :
+    HTMLEditor() {
     init {
         this.translateX = initX
         this.translateY = initY
-        this.prefWidth = max(defWidth,80.0)
+        this.prefWidth = max(defWidth, 180.0)
         this.prefHeight = max(defHeight, 50.0)
         val nodes = this.lookupAll(".tool-bar")
         for (node in nodes) {
@@ -18,7 +19,7 @@ class TextEditor(initX: Double, initY: Double, private var defWidth: Double, pri
         this.isVisible = true
         this.isDisable = true
         this.style = "-fx-background-color: transparent;"
-        this.htmlText = "TEXT"
+        this.htmlText = "Write something!"
 
         val editable = this.lookup(".web-view")
         val listener = ChangeListener<Boolean> { _, _, newValue ->
@@ -37,7 +38,7 @@ class TextEditor(initX: Double, initY: Double, private var defWidth: Double, pri
         val toolBar = this.lookupAll(".tool-bar")
         for (node in toolBar) {
             node.isVisible = true
-            if(defWidth >= 200.0 && defHeight >= 100.0) node.isManaged = true
+            if (defWidth >= 200.0 && defHeight >= 100.0) node.isManaged = true
             else {
                 node.translateY = prefHeight
                 node.translateX = 20.0
@@ -50,11 +51,12 @@ class TextEditor(initX: Double, initY: Double, private var defWidth: Double, pri
         }
         this.isVisible = true
     }
+
     private fun hideToolBar() {
         val toolBar = this.lookupAll(".tool-bar")
         for (node in toolBar) {
             node.isVisible = false
-            if(defWidth >= 200.0 && defHeight >= 100.0) node.isManaged = false
+            if (defWidth >= 200.0 && defHeight >= 100.0) node.isManaged = false
             else {
                 node.translateY = -1 * prefHeight
                 node.translateX = -20.0

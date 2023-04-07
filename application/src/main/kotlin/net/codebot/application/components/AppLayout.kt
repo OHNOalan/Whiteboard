@@ -36,18 +36,14 @@ class AppLayout(stage: Stage) {
 
                 AppSidebar(whiteboard, appCanvas, this)
                 AppTopbar(whiteboard, appCanvas)
-                if (sceneReference != null) {
-                    sceneReference.root = whiteboard
-                }
+                sceneReference.root = whiteboard
                 centerStage()
             }
 
             SceneIndex.LOGIN_PAGE -> {
                 stageReference.width = 640.0
                 stageReference.height = 480.0
-                if (sceneReference != null) {
-                    sceneReference.root = loginPage
-                }
+                sceneReference.root = loginPage
                 centerStage()
             }
         }
@@ -56,7 +52,7 @@ class AppLayout(stage: Stage) {
     fun setUsername(user: String) {
         username = user
 
-        if (user.isEmpty() && sceneReference != null) {
+        if (user.isEmpty()) {
             setScene(SceneIndex.LOGIN_PAGE)
         } else {
             setScene(SceneIndex.WHITEBOARD)
