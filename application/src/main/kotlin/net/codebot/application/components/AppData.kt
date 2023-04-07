@@ -5,6 +5,7 @@ import io.ktor.websocket.*
 import javafx.scene.Node
 import javafx.scene.paint.Paint
 import javafx.scene.shape.Ellipse
+import javafx.scene.shape.Line
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
 import kotlinx.coroutines.launch
@@ -34,9 +35,27 @@ data class AppEllipse(
     val fill: String?,
     val stroke: String
 )
+@Serializable
+data class AppText(
+    val translateX: Double,
+    val translateY: Double,
+    val defWidth: Double,
+    val defHeight: Double,
+    val htmlText: String
+)
 
 @Serializable
-data class AppEntities(val lines: List<AppLine>, val rectangles: List<AppRectangle>, val ellipses: List<AppEllipse>)
+data class AppSegment(
+    val stroke: String,
+    val width: Double,
+    val startX: Double,
+    val startY: Double,
+    val endX: Double,
+    val endY: Double,
+)
+
+@Serializable
+data class AppEntities(val lines: List<AppLine>, val rectangles: List<AppRectangle>, val ellipses: List<AppEllipse>, val texts: List<AppText>, val segments: List<AppSegment>)
 
 @Serializable
 data class AppResponseEntity(
@@ -55,6 +74,7 @@ data class NodeData(val type: String, val id: String)
 object AppData {
     private var counter = 0
     private lateinit var socket: DefaultWebSocketSession
+    private lateinit var appLayout: AppLayout
 
     fun serializeSingle(node: Node): String {
         var result = ""
@@ -96,6 +116,35 @@ object AppData {
                     )
                 )
             }
+
+            EntityIndex.TEXT -> {
+                val text = node as AppTextEditor
+                result = Json.encodeToString(
+                    AppText.serializer(),
+                    AppText(
+                        text.translateX,
+                        text.translateY,
+                        text.prefWidth,
+                        text.prefHeight,
+                        text.htmlText
+                    )
+                )
+            }
+
+            EntityIndex.SEGMENT -> {
+                val segment  = node as Line
+                result = Json.encodeToString(
+                    AppSegment.serializer(),
+                    AppSegment(
+                        segment.stroke.toString(),
+                        segment.strokeWidth,
+                        segment.startX,
+                        segment.startY,
+                        segment.endX,
+                        segment.endY
+                    )
+                )
+            }
         }
         return result
     }
@@ -104,6 +153,8 @@ object AppData {
         val lines = mutableListOf<AppLine>()
         val rectangles = mutableListOf<AppRectangle>()
         val ellipses = mutableListOf<AppEllipse>()
+        val texts = mutableListOf<AppText>()
+        val segments = mutableListOf<AppSegment>()
         for (node in nodes) {
             when ((node.userData as NodeData).type) {
                 EntityIndex.LINE -> {
@@ -138,9 +189,36 @@ object AppData {
                         )
                     )
                 }
+
+                EntityIndex.TEXT -> {
+                    val text = node as AppTextEditor
+                    texts.add(
+                        AppText(
+                            text.translateX,
+                            text.translateY,
+                            text.prefWidth,
+                            text.prefHeight,
+                            text.htmlText
+                        )
+                    )
+                }
+
+                EntityIndex.SEGMENT -> {
+                    val segment = node as Line
+                    segments.add(
+                        AppSegment(
+                            segment.stroke.toString(),
+                            segment.strokeWidth,
+                            segment.startX,
+                            segment.startY,
+                            segment.endX,
+                            segment.endY
+                        )
+                    )
+                }
             }
         }
-        return AppEntities(lines, rectangles, ellipses)
+        return AppEntities(lines, rectangles, ellipses, texts, segments)
     }
 
     fun deserialize(data: String): List<Node> {
@@ -154,6 +232,12 @@ object AppData {
         }
         for (ellipse in nodes.ellipses) {
             decoded.add(deserializeEllipse(ellipse, generateNodeId()))
+        }
+        for (text in nodes.texts) {
+            decoded.add(deserializeText(text, generateNodeId()))
+        }
+        for (segment in nodes.segments) {
+            decoded.add(deserializeSegment(segment, generateNodeId()))
         }
         return decoded
     }
@@ -189,6 +273,25 @@ object AppData {
         decodedEllipse.stroke = Paint.valueOf(ellipse.stroke)
         decodedEllipse.userData = NodeData(EntityIndex.ELLIPSE, id)
         return decodedEllipse
+    }
+
+    fun deserializeText(text: AppText, id: String): Node {
+        val decodedText = AppTextEditor(text.translateX, text.translateY, text.defWidth, text.defHeight)
+        decodedText.htmlText = text.htmlText
+        decodedText.userData = NodeData(EntityIndex.TEXT, id)
+        return decodedText
+    }
+
+    fun deserializeSegment(segment: AppSegment, id: String): Node {
+        val decodedSegment = Line()
+        decodedSegment.stroke = Paint.valueOf(segment.stroke)
+        decodedSegment.strokeWidth = segment.width
+        decodedSegment.startX = segment.startX
+        decodedSegment.startY = segment.startY
+        decodedSegment.endX = segment.endX
+        decodedSegment.endY = segment.endY
+        decodedSegment.userData = NodeData(EntityIndex.SEGMENT, id)
+        return decodedSegment
     }
 
     fun broadcastCreate(nodes: List<Node>) {
@@ -273,12 +376,16 @@ object AppData {
     }
 
     fun generateNodeId(): String {
-        val id = "terry" + "/" + System.currentTimeMillis().toString() + "-" + counter.toString()
+        val id = appLayout.getUsername() + "/" + System.currentTimeMillis().toString() + "-" + counter.toString()
         counter += 1
         return id
     }
 
     fun registerSocket(session: DefaultWebSocketSession) {
         socket = session
+    }
+
+    fun registerAppLayout(appLayoutInstance: AppLayout) {
+        appLayout = appLayoutInstance
     }
 }

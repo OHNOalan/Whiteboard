@@ -1,5 +1,7 @@
 package net.codebot.application.components
 
+import javafx.geometry.HPos
+import javafx.scene.control.Separator
 import javafx.scene.layout.HBox
 import javafx.scene.layout.Priority
 import javafx.scene.layout.Region
@@ -18,6 +20,12 @@ class AppUtils {
             val spacer = Region()
             VBox.setVgrow(spacer, Priority.ALWAYS)
             return spacer
+        }
+
+        fun createSeparator(): Separator {
+            val separator = Separator()
+            separator.halignment = HPos.CENTER
+            return separator
         }
     }
 }

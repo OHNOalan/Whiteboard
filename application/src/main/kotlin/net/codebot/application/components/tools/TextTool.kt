@@ -7,6 +7,7 @@ import javafx.scene.shape.Rectangle
 import net.codebot.application.components.AppData
 import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.NodeData
+import net.codebot.application.components.AppTextEditor
 
 class TextTool(container: HBox) : BaseTool(
     container,
@@ -20,9 +21,17 @@ class TextTool(container: HBox) : BaseTool(
     private val lineWidth: Double = 2.0
     private var initX = 0.0
     private var initY = 0.0
-    private fun onCreateSelection(x: Double, y: Double) { selectionRectangle = onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0) }
-    private fun onResizeSelection(x: Double, y: Double ){ onResizeRectangle(selectionRectangle, x, y) }
-    private fun onRemoveSelection() { onRemoveRectangle(selectionRectangle) }
+    private fun onCreateSelection(x: Double, y: Double) {
+        selectionRectangle = onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0)
+    }
+
+    private fun onResizeSelection(x: Double, y: Double) {
+        onResizeRectangle(selectionRectangle, x, y)
+    }
+
+    private fun onRemoveSelection() {
+        onRemoveRectangle(selectionRectangle)
+    }
 
     private fun onCreateRectangle(
         x: Double,
@@ -43,6 +52,7 @@ class TextTool(container: HBox) : BaseTool(
         canvasReference.children.add(rectangle)
         return rectangle
     }
+
     private fun onResizeRectangle(rectangle: Rectangle, x: Double, y: Double) {
         if (x < initX) {
             rectangle.translateX = x
@@ -62,8 +72,8 @@ class TextTool(container: HBox) : BaseTool(
 
     private fun onRemoveRectangle(rectangle: Rectangle) {
         canvasReference.children.remove(rectangle)
-        rectangle.isVisible = false
     }
+
     override fun canvasMousePressed(e: MouseEvent) {
         initX = e.x
         initY = e.y
@@ -71,25 +81,26 @@ class TextTool(container: HBox) : BaseTool(
     }
 
     override fun canvasMouseReleased(e: MouseEvent) {
-        var width : Double
-        var height : Double
-        if(e.x > initX) {
+        var width: Double
+        var height: Double
+        if (e.x > initX) {
             width = e.x - initX
         } else {
             width = initX - e.x
             initX = e.x
         }
-        if(e.y > initY) {
+        if (e.y > initY) {
             height = e.y - initY
         } else {
             height = initY - e.y
             initY = e.y
         }
         onRemoveSelection()
-        val editor = TextEditor(initX, initY, width, height)
+        val editor = AppTextEditor(initX, initY, width, height)
         editor.userData = NodeData(EntityIndex.TEXT, AppData.generateNodeId())
         canvasReference.addDrawnNode(editor)
     }
+
     override fun canvasMouseDragged(e: MouseEvent) {
         onResizeSelection(e.x, e.y)
     }

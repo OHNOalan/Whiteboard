@@ -7,10 +7,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Ellipse
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
-import net.codebot.application.components.AppData
-import net.codebot.application.components.EntityIndex
-import net.codebot.application.components.NodeData
-import net.codebot.application.components.AppStylebar
+import net.codebot.application.components.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -19,7 +16,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/selection.png",
     "file:src/main/assets/cursors/selection.png",
-    "Selection",
+    "Select",
     ToolIndex.SELECTION,
 ) {
     // selectionRectangle is for making the selection
@@ -113,7 +110,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             // re-enable texteditor nodes
             if (editing) {
                 selectedNodes.map {
-                    if (it is TextEditor) {
+                    if (it is AppTextEditor) {
                         it.isDisable = true
                     }
                 }
@@ -190,7 +187,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             if (abs(e.x - startX) < 10 && abs(e.y - startY) < 10) {
                 for (node in canvasReference.children) {
                     // only able to edit Text for now
-                    if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent) && node is TextEditor) {
+                    if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent) && node is AppTextEditor) {
                         selectedNodes.add(node)
                     }
                 }
@@ -210,7 +207,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 for (node in canvasReference.children) {
                     if (node != selectionRectangle && node.boundsInParent.intersects(selectionRectangle.boundsInParent)) {
                         selectedNodes.add(node)
-                        if (node is TextEditor) {
+                        if (node is AppTextEditor) {
                             node.isDisable = true
                         }
 

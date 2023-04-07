@@ -11,8 +11,6 @@ import io.ktor.websocket.*
 import javafx.application.Platform
 import kotlinx.coroutines.*
 import net.codebot.application.components.AppData
-import java.util.concurrent.Executors
-
 
 class Main : Application() {
     override fun start(stage: Stage) {
@@ -23,12 +21,13 @@ class Main : Application() {
 
         stage.isResizable = true
         stage.title = "Whiteboard"
-        stage.minHeight= 480.0
-        stage.minWidth= 640.0
+        stage.minHeight = 480.0
+        stage.minWidth = 640.0
         stage.maxHeight = 1200.0
         stage.maxWidth = 1600.0
 
         val appLayout = AppLayout(stage)
+        AppData.registerAppLayout(appLayout)
         val webSocketThread = GlobalScope.launch {
             runBlocking {
                 client.webSocket(
@@ -45,7 +44,7 @@ class Main : Application() {
                     for (frame in incoming) {
                         val update = (frame as Frame.Text).readText()
                         println(update)
-                        Platform.runLater() {
+                        Platform.runLater {
                             appLayout.appCanvas.webUpdateCallback(update)
                         }
                     }

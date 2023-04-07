@@ -24,7 +24,7 @@ class SaveMenuItem(menu: Menu, canvas: AppCanvas) :
             fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter("Whiteboard", "*.wb"))
             val selectedFile = fileChooser.showSaveDialog(null)
             if (selectedFile != null) {
-                selectedFile.bufferedWriter()?.use { out ->
+                selectedFile.bufferedWriter().use { out ->
                     out.write(canvasReference.saveFile())
                 }
                 savePath = selectedFile.path

@@ -27,8 +27,9 @@ class AppToolbar(sideBar: VBox, canvas: AppCanvas, stylebar: AppStylebar) {
         val lineThree = HBox()
         lineThree.spacing = 10.0
         lineThree.children.add(AppUtils.createHSpacer())
-        val selectTool = SelectionTool(lineThree, stylebar)
-        canvas.registerTool(selectTool)
+        canvas.registerTool(LineTool(lineThree, stylebar))
+        lineThree.children.add(AppUtils.createHSpacer())
+        canvas.registerTool(SelectionTool(lineThree, stylebar))
         lineThree.children.add(AppUtils.createHSpacer())
 
         val toolsContainer = VBox()

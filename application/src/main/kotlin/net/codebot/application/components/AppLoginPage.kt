@@ -161,7 +161,7 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
         val httpURLConnection: URLConnection = url.openConnection()
         httpURLConnection.doOutput = true // triggers POST
         httpURLConnection.setRequestProperty("Accept-Charset", charset)
-        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=" + charset)
+        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=$charset")
 
         try {
             httpURLConnection.getOutputStream().use { output -> output.write(urlParams.encodeToByteArray()) }
