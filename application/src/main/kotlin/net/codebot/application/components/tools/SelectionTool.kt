@@ -5,6 +5,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Ellipse
+import javafx.scene.shape.Line
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
 import net.codebot.application.components.*
@@ -288,6 +289,16 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                         ellipse.centerY += ellipse.translateY
                         ellipse.translateX = 0.0
                         ellipse.translateY = 0.0
+                    }
+
+                    EntityIndex.SEGMENT -> {
+                        val segment = node as Line
+                        segment.startX += segment.translateX
+                        segment.startY += segment.translateY
+                        segment.endX += segment.translateX
+                        segment.endY += segment.translateY
+                        segment.translateX = 0.0
+                        segment.translateY = 0.0
                     }
                 }
             }

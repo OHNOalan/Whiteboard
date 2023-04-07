@@ -4,10 +4,7 @@ package net.codebot.application.components
 import io.ktor.websocket.*
 import javafx.scene.Node
 import javafx.scene.paint.Paint
-import javafx.scene.shape.Ellipse
-import javafx.scene.shape.Line
-import javafx.scene.shape.Polyline
-import javafx.scene.shape.Rectangle
+import javafx.scene.shape.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.*
@@ -244,6 +241,7 @@ object AppData {
 
     fun deserializeLine(line: AppLine, id: String): Node {
         val decodedLine = Polyline()
+        decodedLine.strokeLineCap = StrokeLineCap.ROUND
         decodedLine.stroke = Paint.valueOf(line.stroke)
         decodedLine.strokeWidth = line.strokeWidth
         decodedLine.points.addAll(line.points)
@@ -284,6 +282,7 @@ object AppData {
 
     fun deserializeSegment(segment: AppSegment, id: String): Node {
         val decodedSegment = Line()
+        decodedSegment.strokeLineCap = StrokeLineCap.ROUND
         decodedSegment.stroke = Paint.valueOf(segment.stroke)
         decodedSegment.strokeWidth = segment.width
         decodedSegment.startX = segment.startX

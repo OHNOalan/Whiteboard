@@ -58,8 +58,11 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
                     layoutReference.setUsername(response.responseMessage)
+                } else {
+                    Preferences.userRoot().clear()
                 }
             } catch (e: Exception) {
+                Preferences.userRoot().clear()
                 e.printStackTrace()
             }
         }
