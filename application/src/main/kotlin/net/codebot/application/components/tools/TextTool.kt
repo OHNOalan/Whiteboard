@@ -22,7 +22,8 @@ class TextTool(container: HBox) : BaseTool(
     private var initX = 0.0
     private var initY = 0.0
     private fun onCreateSelection(x: Double, y: Double) {
-        selectionRectangle = onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0)
+        selectionRectangle =
+            onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0)
     }
 
     private fun onResizeSelection(x: Double, y: Double) {
