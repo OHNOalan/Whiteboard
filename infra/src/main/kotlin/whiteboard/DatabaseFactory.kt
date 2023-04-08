@@ -4,6 +4,9 @@ import kotlinx.coroutines.*
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.*
 import org.jetbrains.exposed.sql.transactions.experimental.*
+import whiteboard.models.Entities
+import whiteboard.models.Users
+
 
 object DatabaseFactory {
     fun init() {

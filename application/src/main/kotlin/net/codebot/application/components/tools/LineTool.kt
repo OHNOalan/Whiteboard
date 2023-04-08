@@ -36,7 +36,7 @@ class LineTool(container: HBox, stylebar: AppStylebar) : BaseTool(
         line.startY = e.y
         line.endX = e.x + 0.1
         line.endY = e.y + 0.1
-        line.userData = NodeData(EntityIndex.SEGMENT, AppData.generateNodeId())
+        line.userData = NodeData(EntityIndex.SEGMENT, AppData.generateNodeId(), System.currentTimeMillis())
         canvasReference.children.add(line)
     }
 

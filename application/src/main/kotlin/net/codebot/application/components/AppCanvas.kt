@@ -84,14 +84,24 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         this.scaleY = 1.0
     }
 
-    // TODO sort by timestamp added
     // TODO selection tool needs undo and redo
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun addDrawnNode(node: Node, broadcast: Boolean = true) {
         addToUndoStack(Pair("Add", node))
-        drawnItems[(node.userData as NodeData).id] = node
-        this.children.add(node)
+        val nodeData = node.userData as NodeData
+        drawnItems[nodeData.id] = node
+        var insertionPoint = children.size
+        for (i in children.indices) {
+            val child = children[i]
+            if (child.userData is NodeData) {
+                if ((child.userData as NodeData).timestamp > nodeData.timestamp) {
+                    insertionPoint = i
+                    break
+                }
+            }
+        }
+        this.children.add(insertionPoint, node)
         if (broadcast) {
             AppData.broadcastAdd(listOf(node))
         }
@@ -237,7 +247,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         when (updateJson.operation) {
             OperationIndex.ADD -> {
                 for (node in updateJson.entities.map {
-                    AppData.deserializeSingle(it, it.id)
+                    AppData.deserializeSingle(it, it.id, it.timestamp)
                 }) {
                     addDrawnNode(node, false)
                 }
@@ -255,7 +265,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
                     drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
                 }
                 for (node in updateJson.entities.map {
-                    AppData.deserializeSingle(it, it.id)
+                    AppData.deserializeSingle(it, it.id, it.timestamp)
                 }) {
                     addDrawnNode(node, false)
                 }

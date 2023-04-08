@@ -1,12 +1,19 @@
-package whiteboard
+package whiteboard.models
 
 import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import whiteboard.DatabaseFactory.dbQuery
 
+
 @Serializable
-data class Entity(val id: String, val roomId: Int, val descriptor: String, val type: String, val timestamp: Long)
+data class Entity(
+    val id: String,
+    val roomId: Int,
+    val descriptor: String,
+    val type: String,
+    val timestamp: Long
+)
 
 object Entities : Table() {
     val id = varchar("id", 256)
@@ -26,7 +33,13 @@ object EntityControl {
         timestamp = row[Entities.timestamp]
     )
 
-    suspend fun create(id: String, roomId: Int, descriptor: String, type: String, timestamp: Long): Entity? = dbQuery {
+    suspend fun create(
+        id: String,
+        roomId: Int,
+        descriptor: String,
+        type: String,
+        timestamp: Long
+    ): Entity? = dbQuery {
         val resultStatement = Entities.insert {
             it[Entities.id] = id
             it[Entities.roomId] = roomId
@@ -34,13 +47,14 @@ object EntityControl {
             it[Entities.type] = type
             it[Entities.timestamp] = timestamp
         }
-        resultStatement.resultedValues?.singleOrNull()?.let(::resultToEntity)
+        resultStatement.resultedValues?.singleOrNull()
+            ?.let(EntityControl::resultToEntity)
     }
 
     suspend fun load(roomId: Int): List<Entity> = dbQuery {
         Entities
             .select { Entities.roomId eq roomId }
-            .map(::resultToEntity)
+            .map(EntityControl::resultToEntity)
     }
 
     suspend fun delete(id: String): Boolean = dbQuery {
@@ -53,3 +67,4 @@ object EntityControl {
         } > 0
     }
 }
+
