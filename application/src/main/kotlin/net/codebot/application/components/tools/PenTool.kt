@@ -61,7 +61,7 @@ class PenTool(container: HBox, stylebar: AppStylebar) : BaseTool(
                 e.x, e.y
             )
         )
-        currentPolyline.userData = NodeData(EntityIndex.LINE, AppData.generateNodeId())
+        currentPolyline.userData = NodeData(EntityIndex.LINE, AppData.generateNodeId(), System.currentTimeMillis())
         // We let the current line be a preview only and will only commit if mouse is released
         canvasReference.children.add(currentPolyline)
     }

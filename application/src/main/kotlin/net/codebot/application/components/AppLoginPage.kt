@@ -10,8 +10,8 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
+import kotlinx.serialization.json.Json
 import java.io.BufferedReader
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLConnection
@@ -23,14 +23,12 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
     private var layoutReference: AppLayout = layout
     private val charset = "UTF-8"
 
-    private data class APIResponse(val success: Boolean, val responseMessage: String)
-
     init {
         this.alignment = Pos.CENTER
         this.hgap = 10.0
         this.vgap = 10.0
         this.padding = Insets(30.0)
-        val loginHeader = Text("Whiteboard Login")
+        val loginHeader = Text("Login to Whiteboard")
         loginHeader.font = (Font.font("System", FontWeight.NORMAL, 25.0))
         this.add(loginHeader, 0, 0, 2, 1)
 
@@ -45,19 +43,18 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
         val token = Preferences.userRoot().get("token", "Token")
 
         if (token != "Token") {
-            val urlRoute = "/user/autologin"
-            val urlParams = String.format(
-                "token=%s",
-                URLEncoder.encode(token, charset)
-            )
-
             try {
-                val response = APIWrapper(urlRoute, urlParams)
+                val response = httpRequest(
+                    "/user/autologin", String.format(
+                        "token=%s",
+                        URLEncoder.encode(token, charset)
+                    )
+                )
 
                 if (response.success) {
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
-                    layoutReference.setUsername(response.responseMessage)
+                    layoutReference.setUsername(response.message)
                 } else {
                     Preferences.userRoot().clear()
                 }
@@ -67,14 +64,14 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
             }
         }
 
-        val username = Label("Username:")
-        this.add(username, 0, 2)
+        val usernameLabel = Label("Username:")
+        this.add(usernameLabel, 0, 2)
 
         val usernameTextField = TextField()
         this.add(usernameTextField, 1, 2)
 
-        val password = Label("Password:")
-        this.add(password, 0, 3)
+        val passwordLabel = Label("Password:")
+        this.add(passwordLabel, 0, 3)
 
         val passwordBox = PasswordField()
         this.add(passwordBox, 1, 3)
@@ -100,18 +97,18 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
                 URLEncoder.encode(password, charset)
             )
             try {
-                val response = APIWrapper(urlRoute, urlParams)
+                val response = httpRequest(urlRoute, urlParams)
 
                 if (response.success) {
                     if (rememberMeCheckbox.isSelected) {
                         val pref: Preferences = Preferences.userRoot()
-                        pref.put("token", response.responseMessage)
+                        pref.put("token", response.message)
                     }
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
                     layoutReference.setUsername(username)
                 } else {
-                    registerError.text = response.responseMessage
+                    registerError.text = response.message
                     registerError.opacity = 1.0
                     loginError.opacity = 0.0
                 }
@@ -134,18 +131,18 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
                 URLEncoder.encode(password, charset)
             )
             try {
-                val response = APIWrapper(urlRoute, urlParams)
+                val response = httpRequest(urlRoute, urlParams)
 
                 if (response.success) {
                     if (rememberMeCheckbox.isSelected) {
                         val pref: Preferences = Preferences.userRoot()
-                        pref.put("token", response.responseMessage)
+                        pref.put("token", response.message)
                     }
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
                     layoutReference.setUsername(username)
                 } else {
-                    loginError.text = response.responseMessage
+                    loginError.text = response.message
                     loginError.opacity = 1.0
                     registerError.opacity = 0.0
                 }
@@ -156,7 +153,7 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
         this.add(hbLoginButton, 1, 5)
     }
 
-    private fun APIWrapper(urlRoute: String, urlParams: String): APIResponse {
+    private fun httpRequest(urlRoute: String, urlParams: String): AppResponseSchema {
         val urlHost = "http://127.0.0.1:8080"
         val urlText = "$urlHost$urlRoute?$urlParams"
         val url = URL(urlText)
@@ -164,21 +161,30 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
         val httpURLConnection: URLConnection = url.openConnection()
         httpURLConnection.doOutput = true // triggers POST
         httpURLConnection.setRequestProperty("Accept-Charset", charset)
-        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=$charset")
+        httpURLConnection.setRequestProperty(
+            "Content-Type",
+            "application/x-www-form-urlencoded;charset=$charset"
+        )
 
         try {
-            httpURLConnection.getOutputStream().use { output -> output.write(urlParams.encodeToByteArray()) }
-            val response: InputStream = httpURLConnection.getInputStream()
-            val success: Boolean = response.read().toChar() == '+'
-            var responseMessage: String
-            BufferedReader(InputStreamReader(response, charset)).use { reader ->
-                responseMessage = reader.readLine()
+            httpURLConnection.getOutputStream()
+                .use { output -> output.write(urlParams.encodeToByteArray()) }
+            var response: AppResponseSchema
+            BufferedReader(
+                InputStreamReader(
+                    httpURLConnection.getInputStream(),
+                    charset
+                )
+            ).use { reader ->
+                response = Json.decodeFromString(
+                    AppResponseSchema.serializer(),
+                    reader.readText()
+                )
             }
-            return APIResponse(success, responseMessage)
+            return response
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        return APIResponse(false, "")
+        return AppResponseSchema(false, "A network problem has occurred.")
     }
 }

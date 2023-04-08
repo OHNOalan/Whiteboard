@@ -98,7 +98,7 @@ class TextTool(container: HBox) : BaseTool(
         }
         onRemoveSelection()
         val editor = AppTextEditor(initX, initY, width, height)
-        editor.userData = NodeData(EntityIndex.TEXT, AppData.generateNodeId())
+        editor.userData = NodeData(EntityIndex.TEXT, AppData.generateNodeId(), System.currentTimeMillis())
         canvasReference.addDrawnNode(editor)
     }
 

@@ -40,7 +40,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         startY = y
         rectangle.translateX = x
         rectangle.translateY = y
-        rectangle.userData = NodeData(EntityIndex.RECTANGLE, AppData.generateNodeId())
+        rectangle.userData = NodeData(EntityIndex.RECTANGLE, AppData.generateNodeId(), System.currentTimeMillis())
         canvasReference.children.add(rectangle)
     }
 
@@ -51,7 +51,7 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         ellipse.fill = if (fillShape) lineColor else null
         ellipse.centerX = x
         ellipse.centerY = y
-        ellipse.userData = NodeData(EntityIndex.ELLIPSE, AppData.generateNodeId())
+        ellipse.userData = NodeData(EntityIndex.ELLIPSE, AppData.generateNodeId(), System.currentTimeMillis())
         canvasReference.children.add(ellipse)
     }
 
