@@ -6,13 +6,9 @@ import javafx.scene.ImageCursor
 import javafx.scene.Node
 import javafx.scene.control.ColorPicker
 import javafx.scene.control.ScrollPane
-import javafx.scene.image.Image
+import javafx.scene.image.*
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
-import javafx.scene.image.PixelFormat
-import javafx.scene.image.PixelReader
-import javafx.scene.image.WritableImage
-import javafx.scene.image.WritablePixelFormat
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
@@ -248,6 +244,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             }
 
             OperationIndex.DELETE -> {
+                deselectItemIfSelected()
                 for (entity in updateJson.entities) {
                     drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
                 }
