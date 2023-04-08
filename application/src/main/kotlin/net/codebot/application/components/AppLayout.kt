@@ -104,7 +104,7 @@ class AppLayout(stage: Stage) {
         } else {
             setScene(SceneIndex.WHITEBOARD)
 
-            // start socket only when user is authenticated
+            // Start socket only when user is authenticated
             startSocketConnection()
         }
     }
