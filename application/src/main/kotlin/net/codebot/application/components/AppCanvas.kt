@@ -251,7 +251,6 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             }
 
             OperationIndex.MODIFY -> {
-                deselectItemIfSelected()
                 for (entity in updateJson.entities) {
                     drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
                 }
