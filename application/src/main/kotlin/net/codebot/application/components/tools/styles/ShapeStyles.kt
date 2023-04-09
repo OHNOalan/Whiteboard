@@ -7,7 +7,6 @@ import javafx.scene.control.ColorPicker
 import javafx.scene.control.Label
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
-import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.AppUtils

@@ -24,14 +24,12 @@ class AppMenubar(topBar: VBox, canvas: AppCanvas) {
 
         menuBar.menus.add(fileMenu)
 
-
         val editMenu = Menu("Edit")
         UndoMenuItem(editMenu, canvas)
         RedoMenuItem(editMenu, canvas)
         ClearMenuItem(editMenu, canvas)
 
         menuBar.menus.add(editMenu)
-
 
         val viewMenu = Menu("View")
         ZoomInMenuItem(viewMenu, canvas)

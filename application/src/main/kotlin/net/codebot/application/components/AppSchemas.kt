@@ -36,7 +36,7 @@ data class AppTextSchema(
     val translateY: Double,
     val defWidth: Double,
     val defHeight: Double,
-    val htmlText: String
+    var htmlText: String
 )
 
 @Serializable
@@ -53,14 +53,15 @@ data class AppSegmentSchema(
 data class AppEntitySchema(
     val id: String,
     val roomId: Int,
-    val descriptor: String,
+    var descriptor: String,
+    var previousDescriptor: String?,
     val type: String,
     val timestamp: Long,
 )
 
 @Serializable
 data class AppEntitiesSchema(
-    val entities: List<AppEntitySchema>, val operation: Int
+    val entities: List<AppEntitySchema>, val operation: Int, val undoState: Int
 )
 
 @Serializable

@@ -9,10 +9,16 @@ import javafx.scene.layout.HBox
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.tools.styles.BaseStyles
 
-abstract class BaseTool(container: HBox, imageUrl: String, cursorImageUrl: String, buttonText: String, private val toolId: Int) {
-    private val cursorImage : Image = Image(cursorImageUrl, 32.0, 32.0, true, true)
-    protected lateinit var canvasReference : AppCanvas
-    protected open val stylesControl : BaseStyles? = null
+abstract class BaseTool(
+    container: HBox,
+    imageUrl: String,
+    cursorImageUrl: String,
+    buttonText: String,
+    private val toolId: Int
+) {
+    private val cursorImage: Image = Image(cursorImageUrl, 32.0, 32.0, true, true)
+    protected lateinit var canvasReference: AppCanvas
+    protected open val stylesControl: BaseStyles? = null
 
     init {
         val image = ImageView(Image(imageUrl, 80.0, 80.0, true, true))

@@ -9,7 +9,8 @@ import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.EraserTool
 import kotlin.math.roundToInt
 
-class EraserStyles(styleBar: AppStylebar, eraserTool: EraserTool) : BaseStyles(styleBar) {
+class EraserStyles(styleBar: AppStylebar, eraserTool: EraserTool) :
+    BaseStyles(styleBar) {
     init {
         val sliderContainer = HBox()
         val slider = Slider(0.0, 1.0, 0.5)

@@ -14,15 +14,17 @@ object AppData {
     private lateinit var socket: DefaultWebSocketSession
     private lateinit var appLayout: AppLayout
 
+    // Serializes a list of nodes into a string format
+    // Use for saving canvas entities to a local file
     fun serializeLocal(nodes: List<Node>): String {
         val entities = mutableListOf<AppEntitySchema>()
         for (node in nodes) {
             val type = (node.userData as NodeData).type
-            entities.add(AppEntitySchema("", 0, serializeSingle(node), type, 0))
+            entities.add(AppEntitySchema("", 0, serializeSingle(node), null, type, 0))
         }
         return Json.encodeToString(
             AppEntitiesSchema.serializer(),
-            AppEntitiesSchema(entities, OperationIndex.ADD)
+            AppEntitiesSchema(entities, OperationIndex.ADD, UndoIndex.NONE)
         )
     }
 
@@ -31,82 +33,106 @@ object AppData {
             Json.decodeFromString(AppEntitiesSchema.serializer(), entities)
         val decoded = mutableListOf<Node>()
         for (entity in appEntities.entities) {
-            decoded.add(deserializeSingle(entity, null, null))
+            decoded.add(deserializeSingle(entity, null, null, null, entity.descriptor))
         }
         return decoded
     }
 
-    private fun deserializeLine(line: AppLineSchema, id: String, timestamp: Long): Node {
-        val decodedLine = Polyline()
-        decodedLine.strokeLineCap = StrokeLineCap.ROUND
-        decodedLine.stroke = Paint.valueOf(line.stroke)
-        decodedLine.strokeWidth = line.strokeWidth
-        decodedLine.points.addAll(line.points)
-        decodedLine.userData = NodeData(EntityIndex.LINE, id,timestamp)
-        return decodedLine
+    // Deserialize encoded line data into a polyline object
+    private fun deserializeLine(
+        line: AppLineSchema,
+        id: String,
+        timestamp: Long,
+        node: Polyline
+    ) {
+        node.strokeLineCap = StrokeLineCap.ROUND
+        node.stroke = Paint.valueOf(line.stroke)
+        node.strokeWidth = line.strokeWidth
+        node.points.clear()
+        node.points.addAll(line.points)
+        node.userData = NodeData(EntityIndex.LINE, id, timestamp)
     }
 
-    private fun deserializeRectangle(rectangle: AppRectangleSchema, id: String, timestamp: Long): Node {
-        val decodedRectangle = Rectangle()
-        decodedRectangle.translateX = rectangle.x
-        decodedRectangle.translateY = rectangle.y
-        decodedRectangle.width = rectangle.width
-        decodedRectangle.height = rectangle.height
-        decodedRectangle.fill =
+    private fun deserializeRectangle(
+        rectangle: AppRectangleSchema,
+        id: String,
+        timestamp: Long,
+        node: Rectangle
+    ) {
+        node.translateX = rectangle.x
+        node.translateY = rectangle.y
+        node.width = rectangle.width
+        node.height = rectangle.height
+        node.fill =
             if (rectangle.fill != null) Paint.valueOf(rectangle.fill) else null
-        decodedRectangle.stroke = Paint.valueOf(rectangle.stroke)
-        decodedRectangle.userData = NodeData(EntityIndex.RECTANGLE, id, timestamp)
-        return decodedRectangle
+        node.stroke = Paint.valueOf(rectangle.stroke)
+        node.userData = NodeData(EntityIndex.RECTANGLE, id, timestamp)
     }
 
-    private fun deserializeEllipse(ellipse: AppEllipseSchema, id: String, timestamp: Long): Node {
-        val decodedEllipse = Ellipse()
-        decodedEllipse.centerX = ellipse.x
-        decodedEllipse.centerY = ellipse.y
-        decodedEllipse.radiusX = ellipse.radiusX
-        decodedEllipse.radiusY = ellipse.radiusY
-        decodedEllipse.fill =
+    private fun deserializeEllipse(
+        ellipse: AppEllipseSchema,
+        id: String,
+        timestamp: Long,
+        node: Ellipse
+    ) {
+        node.centerX = ellipse.x
+        node.centerY = ellipse.y
+        node.radiusX = ellipse.radiusX
+        node.radiusY = ellipse.radiusY
+        node.fill =
             if (ellipse.fill != null) Paint.valueOf(ellipse.fill) else null
-        decodedEllipse.stroke = Paint.valueOf(ellipse.stroke)
-        decodedEllipse.userData = NodeData(EntityIndex.ELLIPSE, id, timestamp)
-        return decodedEllipse
+        node.stroke = Paint.valueOf(ellipse.stroke)
+        node.userData = NodeData(EntityIndex.ELLIPSE, id, timestamp)
     }
 
-    private fun deserializeText(text: AppTextSchema, id: String, timestamp: Long): Node {
-        val decodedText = AppTextEditor(
-            text.translateX,
-            text.translateY,
-            text.defWidth,
-            text.defHeight
-        )
-        decodedText.htmlText = text.htmlText
-        decodedText.userData = NodeData(EntityIndex.TEXT, id, timestamp)
-        return decodedText
+    private fun deserializeText(
+        text: AppTextSchema,
+        id: String,
+        timestamp: Long,
+        node: AppTextEditor
+    ) {
+        node.translateX = text.translateX
+        node.translateY = text.translateY
+        node.prefWidth = text.defWidth
+        node.prefHeight = text.defHeight
+        node.htmlText = text.htmlText
+        node.userData = NodeData(EntityIndex.TEXT, id, timestamp)
     }
 
-    private fun deserializeSegment(segment: AppSegmentSchema, id: String, timestamp: Long): Node {
-        val decodedSegment = Line()
-        decodedSegment.strokeLineCap = StrokeLineCap.ROUND
-        decodedSegment.stroke = Paint.valueOf(segment.stroke)
-        decodedSegment.strokeWidth = segment.width
-        decodedSegment.startX = segment.startX
-        decodedSegment.startY = segment.startY
-        decodedSegment.endX = segment.endX
-        decodedSegment.endY = segment.endY
-        decodedSegment.userData = NodeData(EntityIndex.SEGMENT, id, timestamp)
-        return decodedSegment
+    private fun deserializeSegment(
+        segment: AppSegmentSchema,
+        id: String,
+        timestamp: Long,
+        node: Line
+    ) {
+        node.strokeLineCap = StrokeLineCap.ROUND
+        node.stroke = Paint.valueOf(segment.stroke)
+        node.strokeWidth = segment.width
+        node.startX = segment.startX
+        node.startY = segment.startY
+        node.endX = segment.endX
+        node.endY = segment.endY
+        node.userData = NodeData(EntityIndex.SEGMENT, id, timestamp)
     }
 
     fun broadcastAdd(nodes: List<Node>) {
-        broadcast(OperationIndex.ADD, nodes)
+        broadcast(nodesToAppEntitySchemas(nodes), OperationIndex.ADD)
     }
 
     fun broadcastDelete(nodes: List<Node>) {
-        broadcast(OperationIndex.DELETE, nodes)
+        broadcast(nodesToAppEntitySchemas(nodes), OperationIndex.DELETE)
     }
 
-    fun broadcastModify(nodes: List<Node>) {
-        broadcast(OperationIndex.MODIFY, nodes)
+    fun broadcastModify(entitySchemas: List<AppEntitySchema>) {
+        broadcast(entitySchemas, OperationIndex.MODIFY)
+    }
+
+    fun broadcastUndo() {
+        broadcast(listOf(), OperationIndex.UNDO)
+    }
+
+    fun broadcastRedo() {
+        broadcast(listOf(), OperationIndex.REDO)
     }
 
     fun generateNodeId(): String {
@@ -124,23 +150,32 @@ object AppData {
         appLayout = appLayoutInstance
     }
 
-    private fun broadcast(operation: Int, nodes: List<Node>) {
+    fun nodeToAppEntitySchema(node: Node): AppEntitySchema {
+        val nodeData = node.userData as NodeData
+        return AppEntitySchema(
+            nodeData.id,
+            123,
+            serializeSingle(node),
+            null,
+            nodeData.type,
+            nodeData.timestamp
+        )
+    }
+
+    private fun nodesToAppEntitySchemas(nodes: List<Node>): List<AppEntitySchema> {
         val entities = mutableListOf<AppEntitySchema>()
         for (node in nodes) {
-            val nodeData = node.userData as NodeData
             entities.add(
-                AppEntitySchema(
-                    nodeData.id,
-                    123,
-                    if (operation == OperationIndex.DELETE) "" else serializeSingle(node),
-                    nodeData.type,
-                    nodeData.timestamp
-                )
+                nodeToAppEntitySchema(node)
             )
         }
+        return entities
+    }
+
+    private fun broadcast(entities: List<AppEntitySchema>, operation: Int) {
         val data = Json.encodeToString(
             AppEntitiesSchema.serializer(),
-            AppEntitiesSchema(entities, operation)
+            AppEntitiesSchema(entities, operation, UndoIndex.NONE)
         )
         when (operation) {
             OperationIndex.ADD -> {
@@ -163,12 +198,11 @@ object AppData {
         }
     }
 
-    private fun serializeSingle(node: Node): String {
-        var result = ""
+    fun serializeSingle(node: Node): String {
         when ((node.userData as NodeData).type) {
             EntityIndex.LINE -> {
                 val line = node as Polyline
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppLineSchema.serializer(),
                     AppLineSchema(line.stroke.toString(), line.strokeWidth, line.points)
                 )
@@ -176,7 +210,7 @@ object AppData {
 
             EntityIndex.RECTANGLE -> {
                 val rectangle = node as Rectangle
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppRectangleSchema.serializer(),
                     AppRectangleSchema(
                         rectangle.translateX,
@@ -191,7 +225,7 @@ object AppData {
 
             EntityIndex.ELLIPSE -> {
                 val ellipse = node as Ellipse
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppEllipseSchema.serializer(),
                     AppEllipseSchema(
                         ellipse.centerX,
@@ -206,7 +240,7 @@ object AppData {
 
             EntityIndex.TEXT -> {
                 val text = node as AppTextEditor
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppTextSchema.serializer(),
                     AppTextSchema(
                         text.translateX,
@@ -220,7 +254,7 @@ object AppData {
 
             EntityIndex.SEGMENT -> {
                 val segment = node as Line
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppSegmentSchema.serializer(),
                     AppSegmentSchema(
                         segment.stroke.toString(),
@@ -233,56 +267,73 @@ object AppData {
                 )
             }
         }
-        return result
+        return ""
     }
 
-    fun deserializeSingle(entity: AppEntitySchema, id: String?, timestamp: Long?): Node {
+    fun deserializeSingle(
+        entity: AppEntitySchema,
+        id: String?,
+        timestamp: Long?,
+        node: Node?,
+        descriptor: String,
+    ): Node {
         val nodeId = id ?: generateNodeId()
         val nodeTimestamp = timestamp ?: System.currentTimeMillis()
         when (entity.type) {
             EntityIndex.LINE -> {
-                return deserializeLine(
+                val target = if (node == null) Polyline() else node as Polyline
+                deserializeLine(
                     Json.decodeFromString(
                         AppLineSchema.serializer(),
-                        entity.descriptor
-                    ), nodeId, nodeTimestamp
+                        descriptor
+                    ), nodeId, nodeTimestamp, target
                 )
+                return target
             }
 
             EntityIndex.RECTANGLE -> {
-                return deserializeRectangle(
+                val target = if (node == null) Rectangle() else node as Rectangle
+                deserializeRectangle(
                     Json.decodeFromString(
                         AppRectangleSchema.serializer(),
-                        entity.descriptor
-                    ), nodeId, nodeTimestamp
+                        descriptor
+                    ), nodeId, nodeTimestamp, target
                 )
+                return target
             }
 
             EntityIndex.ELLIPSE -> {
-                return deserializeEllipse(
+                val target = if (node == null) Ellipse() else node as Ellipse
+                deserializeEllipse(
                     Json.decodeFromString(
                         AppEllipseSchema.serializer(),
-                        entity.descriptor
-                    ), nodeId, nodeTimestamp
+                        descriptor
+                    ), nodeId, nodeTimestamp, target
                 )
+                return target
             }
 
             EntityIndex.TEXT -> {
-                return deserializeText(
+                val target =
+                    if (node == null) AppTextEditor() else node as AppTextEditor
+                deserializeText(
                     Json.decodeFromString(
                         AppTextSchema.serializer(),
-                        entity.descriptor
-                    ), nodeId, nodeTimestamp
+                        descriptor
+                    ), nodeId, nodeTimestamp, target
                 )
+                return target
             }
 
             EntityIndex.SEGMENT -> {
-                return deserializeSegment(
+                val target = if (node == null) Line() else node as Line
+                deserializeSegment(
                     Json.decodeFromString(
                         AppSegmentSchema.serializer(),
-                        entity.descriptor
-                    ), nodeId, nodeTimestamp
+                        descriptor
+                    ), nodeId, nodeTimestamp, target
                 )
+                return target
             }
         }
         println("Cannot deserialize unknown object.")

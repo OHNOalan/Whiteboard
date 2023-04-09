@@ -9,17 +9,20 @@ import javafx.scene.shape.Line
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
 import net.codebot.application.components.*
+import net.codebot.application.components.tools.styles.SelectStyles
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
+class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/selection.png",
     "file:src/main/assets/cursors/selection.png",
     "Select",
-    ToolIndex.SELECTION,
+    ToolIndex.SELECT,
 ) {
+    override val stylesControl = SelectStyles(styleBar)
+
     // selectionRectangle is for making the selection
     // selectedRectangle is for displaying the resulting selection
     private lateinit var selectionRectangle: Rectangle
@@ -31,6 +34,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
     private val selectedNodes = mutableListOf<Node>()
     private lateinit var editNode: Node
     private var textControlContainer: HBox = HBox()
+    private val selectedNodePreviousSchemas = mutableMapOf<Node, AppEntitySchema>()
 
     private var startX = 0.0
     private var startY = 0.0
@@ -113,7 +117,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             canvasReference.children.remove(selectedRectangle)
             corners.forEach { canvasReference.children.remove(it) }
 
-            // re-enable texteditor nodes
+            // re-enable text editor nodes
             if (editing) {
                 selectedNodes.map {
                     if (it is AppTextEditor) {
@@ -126,11 +130,6 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             selectedNodes.clear()
             itemIsSelected = false
         }
-    }
-
-    private fun deleteSelection() {
-        deselect()
-        selectedNodes.forEach { canvasReference.children.remove(it) }
     }
 
     override fun canvasMousePressed(e: MouseEvent) {
@@ -235,6 +234,12 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 }
 
                 if (selectedNodes.isNotEmpty()) {
+                    selectedNodePreviousSchemas.clear()
+                    for (node in selectedNodes) {
+                        selectedNodePreviousSchemas[node] =
+                            AppData.nodeToAppEntitySchema(node)
+                    }
+
                     itemIsSelected = true
                     selectedRectangle = onCreateRectangle(
                         minX - lineWidth / 2,
@@ -310,10 +315,17 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
         }
         canvasReference.children.remove(selectionRectangle)
         if (selectedNodes.isNotEmpty()) {
-            val modifiedNodes = mutableListOf<Node>()
+            val modifiedMessages = mutableListOf<AppEntitySchema>()
             for (node in selectedNodes) {
                 if (node.translateX == 0.0 && node.translateY == 0.0) {
                     continue
+                }
+                if (node is AppTextEditor) {
+                    if (node.previousTranslateX == node.translateX && node.previousTranslateY == node.translateY) {
+                        continue
+                    }
+                    node.previousTranslateX = node.translateX
+                    node.previousTranslateY = node.translateY
                 }
                 when ((node.userData as NodeData).type) {
                     EntityIndex.LINE -> {
@@ -347,9 +359,21 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                         segment.translateY = 0.0
                     }
                 }
-                modifiedNodes.add(node)
+                val nodePreviousSchema = selectedNodePreviousSchemas[node]
+                if (nodePreviousSchema != null) {
+                    nodePreviousSchema.previousDescriptor =
+                        nodePreviousSchema.descriptor
+                    nodePreviousSchema.descriptor = AppData.serializeSingle(node)
+                    if (nodePreviousSchema.descriptor != nodePreviousSchema.previousDescriptor) {
+                        modifiedMessages.add(nodePreviousSchema)
+                    }
+                } else {
+                    println("Cannot determine previous schema.")
+                }
             }
-            AppData.broadcastModify(modifiedNodes)
+            if (modifiedMessages.size > 0) {
+                AppData.broadcastModify(modifiedMessages)
+            }
         }
     }
 

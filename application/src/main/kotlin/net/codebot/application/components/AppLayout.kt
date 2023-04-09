@@ -120,8 +120,10 @@ class AppLayout(stage: Stage) {
 
     private fun centerStage() {
         val bounds: Rectangle2D = Screen.getPrimary().visualBounds
-        val centerX: Double = bounds.minX + (bounds.width - stageReference.width) * (1.0f / 2)
-        val centerY: Double = bounds.minY + (bounds.height - stageReference.height) * (1.0f / 3)
+        val centerX: Double =
+            bounds.minX + (bounds.width - stageReference.width) * (1.0f / 2)
+        val centerY: Double =
+            bounds.minY + (bounds.height - stageReference.height) * (1.0f / 3)
 
         stageReference.x = centerX
         stageReference.y = centerY

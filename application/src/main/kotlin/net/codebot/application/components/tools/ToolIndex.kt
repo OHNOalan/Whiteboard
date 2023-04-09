@@ -6,5 +6,5 @@ object ToolIndex {
     const val TEXT = 2
     const val SHAPE = 3
     const val LINE = 4
-    const val SELECTION = 5
+    const val SELECT = 5
 }

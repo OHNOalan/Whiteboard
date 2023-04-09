@@ -2,20 +2,14 @@ package net.codebot.application.components
 
 import javafx.beans.value.ChangeListener
 import javafx.scene.web.HTMLEditor
-import kotlin.math.max
+import kotlinx.serialization.json.Json
 
-class AppTextEditor(
-    initX: Double,
-    initY: Double,
-    private var defWidth: Double,
-    private var defHeight: Double,
-) :
-    HTMLEditor() {
+class AppTextEditor : HTMLEditor() {
+    var previousTranslateX: Double? = null
+    var previousTranslateY: Double? = null
+    private lateinit var previousText: String
+
     init {
-        this.translateX = initX
-        this.translateY = initY
-        this.prefWidth = max(defWidth, 180.0)
-        this.prefHeight = max(defHeight, 50.0)
         val nodes = this.lookupAll(".tool-bar")
         for (node in nodes) {
             node.isVisible = false
@@ -30,11 +24,22 @@ class AppTextEditor(
         val listener = ChangeListener<Boolean> { _, _, newValue ->
             if (newValue) {
                 // HTMLEditor has gained focus
+                previousText = this.htmlText
                 showToolBar()
             } else {
                 // HTMLEditor has lost focus
                 hideToolBar()
-                AppData.broadcastModify(listOf(this))
+                if (previousText != this.htmlText) {
+                    val message = AppData.nodeToAppEntitySchema(this)
+                    val entityData = Json.decodeFromString(
+                        AppTextSchema.serializer(),
+                        message.descriptor
+                    )
+                    entityData.htmlText = previousText
+                    message.previousDescriptor =
+                        Json.encodeToString(AppTextSchema.serializer(), entityData)
+                    AppData.broadcastModify(listOf(message))
+                }
             }
         }
         editable.focusedProperty().addListener(listener)
@@ -44,7 +49,7 @@ class AppTextEditor(
         val toolBar = this.lookupAll(".tool-bar")
         for (node in toolBar) {
             node.isVisible = true
-            if (defWidth >= 200.0 && defHeight >= 100.0) node.isManaged = true
+            if (prefWidth >= 200.0 && prefHeight >= 100.0) node.isManaged = true
             else {
                 node.translateY = prefHeight
                 node.translateX = 20.0
@@ -62,7 +67,7 @@ class AppTextEditor(
         val toolBar = this.lookupAll(".tool-bar")
         for (node in toolBar) {
             node.isVisible = false
-            if (defWidth >= 200.0 && defHeight >= 100.0) node.isManaged = false
+            if (prefWidth >= 200.0 && prefHeight >= 100.0) node.isManaged = false
             else {
                 node.translateY = -1 * prefHeight
                 node.translateX = -20.0
