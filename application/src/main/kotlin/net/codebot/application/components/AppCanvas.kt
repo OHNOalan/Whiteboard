@@ -76,7 +76,6 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         this.scaleY = 1.0
     }
 
-    // TODO selection tool needs undo and redo
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun addDrawnNode(node: Node, broadcast: Boolean = true) {
@@ -234,7 +233,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             }
 
             OperationIndex.MODIFY -> {
-                // TODO check what happens if move and select
+                deselectItemIfSelected()
                 for (entity in updateMessage.entities) {
                     var descriptor = entity.descriptor
                     if (usePreviousDescriptor && entity.previousDescriptor != null) {

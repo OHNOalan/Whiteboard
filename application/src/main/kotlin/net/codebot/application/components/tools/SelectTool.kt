@@ -8,10 +8,7 @@ import javafx.scene.shape.Ellipse
 import javafx.scene.shape.Line
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
-import net.codebot.application.components.AppStylebar
-import net.codebot.application.components.AppTextEditor
-import net.codebot.application.components.EntityIndex
-import net.codebot.application.components.NodeData
+import net.codebot.application.components.*
 import net.codebot.application.components.tools.styles.SelectStyles
 import kotlin.math.abs
 import kotlin.math.max
@@ -37,6 +34,7 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     private val selectedNodes = mutableListOf<Node>()
     private lateinit var editNode: Node
     private var textControlContainer: HBox = HBox()
+    private val selectedNodePreviousSchemas = mutableMapOf<Node, AppEntitySchema>()
 
     private var startX = 0.0
     private var startY = 0.0
@@ -236,6 +234,12 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
                 }
 
                 if (selectedNodes.isNotEmpty()) {
+                    selectedNodePreviousSchemas.clear()
+                    for (node in selectedNodes) {
+                        selectedNodePreviousSchemas[node] =
+                            AppData.nodeToAppEntitySchema(node)
+                    }
+
                     itemIsSelected = true
                     selectedRectangle = onCreateRectangle(
                         minX - lineWidth / 2,
@@ -311,7 +315,7 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
         }
         canvasReference.children.remove(selectionRectangle)
         if (selectedNodes.isNotEmpty()) {
-            val modifiedNodes = mutableListOf<Node>()
+            val modifiedMessages = mutableListOf<AppEntitySchema>()
             for (node in selectedNodes) {
                 if (node.translateX == 0.0 && node.translateY == 0.0) {
                     continue
@@ -355,10 +359,20 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
                         segment.translateY = 0.0
                     }
                 }
-                modifiedNodes.add(node)
+                val nodePreviousSchema = selectedNodePreviousSchemas[node]
+                if (nodePreviousSchema != null) {
+                    nodePreviousSchema.previousDescriptor =
+                        nodePreviousSchema.descriptor
+                    nodePreviousSchema.descriptor = AppData.serializeSingle(node)
+                    if (nodePreviousSchema.descriptor != nodePreviousSchema.previousDescriptor) {
+                        modifiedMessages.add(nodePreviousSchema)
+                    }
+                } else {
+                    println("Cannot determine previous schema.")
+                }
             }
-            if (modifiedNodes.size > 0) {
-//                AppData.broadcastModify(modifiedNodes)
+            if (modifiedMessages.size > 0) {
+                AppData.broadcastModify(modifiedMessages)
             }
         }
     }

@@ -198,7 +198,7 @@ object AppData {
         }
     }
 
-    private fun serializeSingle(node: Node): String {
+    fun serializeSingle(node: Node): String {
         when ((node.userData as NodeData).type) {
             EntityIndex.LINE -> {
                 val line = node as Polyline

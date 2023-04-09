@@ -53,7 +53,7 @@ data class AppSegmentSchema(
 data class AppEntitySchema(
     val id: String,
     val roomId: Int,
-    val descriptor: String,
+    var descriptor: String,
     var previousDescriptor: String?,
     val type: String,
     val timestamp: Long,
