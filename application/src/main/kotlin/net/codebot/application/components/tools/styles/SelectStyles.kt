@@ -6,6 +6,13 @@ import javafx.scene.text.Font
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.AppUtils
 
+/**
+ * Creates the styles for the selection tool.
+ *
+ * Note that the selection tool has no "styles" per se, only a label as a descriptor.
+ *
+ * @param styleBar The style bar to add the styles to.
+ */
 class SelectStyles(styleBar: AppStylebar) : BaseStyles(styleBar) {
     init {
         val container = HBox()

@@ -11,7 +11,11 @@ import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.PenTool
 import kotlin.math.roundToInt
 
-
+/**
+ * Creates the styles for the pen tool.
+ * @param styleBar The style bar to add the styles to.
+ * @param penTool A reference to the pen tool.
+ */
 class PenStyles(styleBar: AppStylebar, penTool: PenTool) : BaseStyles(styleBar) {
     init {
         val colorPickerContainer = HBox()

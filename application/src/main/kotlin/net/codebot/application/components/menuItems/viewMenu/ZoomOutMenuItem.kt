@@ -7,6 +7,11 @@ import javafx.scene.input.KeyCombination
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.menuItems.BaseMenuItem
 
+/**
+ * Creates the menu item to zoom out of the canvas. Shortcut: CTRL+MINUS
+ * @param menu The menu to add this item to.
+ * @param canvas The main canvas of the whiteboard.
+ */
 class ZoomOutMenuItem(menu: Menu, canvas: AppCanvas) :
     BaseMenuItem(
         menu,
@@ -16,6 +21,9 @@ class ZoomOutMenuItem(menu: Menu, canvas: AppCanvas) :
 
     private var canvasReference: AppCanvas = canvas
 
+    /**
+     * Zooms out of the canvas when the menu item is clicked.
+     */
     override fun onItemClicked() {
         canvasReference.zoomOut()
     }
