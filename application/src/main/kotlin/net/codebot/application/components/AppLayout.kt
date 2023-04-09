@@ -47,7 +47,7 @@ class AppLayout(stage: Stage) {
             runBlocking {
                 client.webSocket(
                     method = HttpMethod.Get,
-                    host = "0.0.0.0",
+                    host = "whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io",
                     path = "/sync",
                     port = 8080,
                     request = {

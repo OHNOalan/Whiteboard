@@ -154,7 +154,7 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
     }
 
     private fun httpRequest(urlRoute: String, urlParams: String): AppResponseSchema {
-        val urlHost = "http://127.0.0.1:8080"
+        val urlHost = "http://whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io:8080"
         val urlText = "$urlHost$urlRoute?$urlParams"
         val url = URL(urlText)
 
