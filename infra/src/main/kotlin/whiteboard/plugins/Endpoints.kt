@@ -25,6 +25,7 @@ fun Application.configureEndpoints() {
                         "Username length must be greater than 5 characters."
                     )
                 }
+                return@post
             }
             if (username.length > 16) {
                 call.respondText {
@@ -33,14 +34,7 @@ fun Application.configureEndpoints() {
                         "Username length must be less than or equal to 16 characters."
                     )
                 }
-            }
-            if (UserControl.getByUsername(username) != null) {
-                call.respondText {
-                    AppUtils.generateResponse(
-                        false,
-                        "A user with this username already exists."
-                    )
-                }
+                return@post
             }
             if (password.length < 5) {
                 call.respondText {
@@ -49,6 +43,16 @@ fun Application.configureEndpoints() {
                         "Password length must be greater than 5 characters."
                     )
                 }
+                return@post
+            }
+            if (UserControl.getByUsername(username) != null) {
+                call.respondText {
+                    AppUtils.generateResponse(
+                        false,
+                        "A user with this username already exists."
+                    )
+                }
+                return@post
             }
             val user = UserControl.create(username, password)
             if (user != null) {

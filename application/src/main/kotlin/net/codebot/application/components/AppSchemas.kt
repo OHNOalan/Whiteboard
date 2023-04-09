@@ -60,7 +60,7 @@ data class AppEntitySchema(
 
 @Serializable
 data class AppEntitiesSchema(
-    val entities: List<AppEntitySchema>, val operation: Int
+    val entities: List<AppEntitySchema>, val operation: Int, val undoState: Int
 )
 
 @Serializable

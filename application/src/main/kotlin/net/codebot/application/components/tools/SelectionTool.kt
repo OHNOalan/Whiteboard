@@ -128,11 +128,6 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
         }
     }
 
-    private fun deleteSelection() {
-        deselect()
-        selectedNodes.forEach { canvasReference.children.remove(it) }
-    }
-
     override fun canvasMousePressed(e: MouseEvent) {
         // if click is inside selection then we are now moving the selection
         if (itemIsSelected && isClickInSelectionBox(e.x, e.y)) {
@@ -315,6 +310,13 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 if (node.translateX == 0.0 && node.translateY == 0.0) {
                     continue
                 }
+                if (node is AppTextEditor) {
+                    if (node.previousTranslateX == node.translateX && node.previousTranslateY == node.translateY) {
+                        continue
+                    }
+                    node.previousTranslateX = node.translateX
+                    node.previousTranslateY = node.translateY
+                }
                 when ((node.userData as NodeData).type) {
                     EntityIndex.LINE -> {
                         val line = node as Polyline
@@ -349,7 +351,9 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 }
                 modifiedNodes.add(node)
             }
-            AppData.broadcastModify(modifiedNodes)
+            if (modifiedNodes.size > 0) {
+                AppData.broadcastModify(modifiedNodes)
+            }
         }
     }
 

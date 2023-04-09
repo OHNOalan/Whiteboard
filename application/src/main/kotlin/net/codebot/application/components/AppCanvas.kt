@@ -25,8 +25,6 @@ import javax.imageio.ImageIO
 
 class AppCanvas(borderPane: BorderPane) : Pane() {
     private val tools: MutableList<BaseTool> = mutableListOf()
-    private val undoStack: ArrayDeque<Pair<String, Node>> = ArrayDeque()
-    private val redoStack: ArrayDeque<Pair<String, Node>> = ArrayDeque()
     private val drawnItems: MutableMap<String, Node> = mutableMapOf()
     private var selectedTool: Int = 0
     private val scrollPane: ScrollPane = ScrollPane()
@@ -63,12 +61,6 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         borderPane.center = scrollPane
     }
 
-    private fun addToUndoStack(action: Pair<String, Node>) {
-        // clear redo stack - overwriting old undone changes
-        redoStack.clear()
-        undoStack.addFirst(action)
-    }
-
     fun zoomIn() {
         this.scaleX += 0.1
         this.scaleY += 0.1
@@ -88,7 +80,6 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun addDrawnNode(node: Node, broadcast: Boolean = true) {
-        addToUndoStack(Pair("Add", node))
         val nodeData = node.userData as NodeData
         drawnItems[nodeData.id] = node
         var insertionPoint = children.size
@@ -110,7 +101,6 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     // Use this function only to add user drawn entities
     // Do not use this for things like pointer or preview elements
     fun removeDrawnNode(node: Node, broadcast: Boolean = true) {
-        addToUndoStack(Pair("Remove", node))
         drawnItems.remove((node.userData as NodeData).id)
         this.children.remove(node)
         if (broadcast) {
@@ -118,10 +108,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         }
     }
 
-    // Upon undo or redo, if an item is selected, it should be deselected
-    // This fixes a bug where if an item is selected and its creation is undone,
-    // the selection box will remain and can still be interacted with.
-    // TODO can be more sophisticated - can add check in SelectionTool if the undo/redo item matches the selected item
+    // Deselect items in undo redo or when delete is synchronized
     private fun deselectItemIfSelected() {
         val selectionTool = tools[ToolIndex.SELECTION] as SelectionTool
         selectionTool.deselect()
@@ -186,33 +173,13 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     }
 
     fun undo() {
-        if (undoStack.size > 0) {
-            deselectItemIfSelected()
-            val (undoType, node) = undoStack.removeFirst()
-            if (undoType == "Add") {
-                drawnItems.remove((node.userData as NodeData).id)
-                this.children.remove(node)
-            } else {
-                drawnItems[(node.userData as NodeData).id] = node
-                this.children.add(node)
-            }
-            redoStack.addFirst(Pair(undoType, node))
-        }
+        deselectItemIfSelected()
+        AppData.broadcastUndo()
     }
 
     fun redo() {
-        if (redoStack.size > 0) {
-            deselectItemIfSelected()
-            val (redoType, node) = redoStack.removeFirst()
-            if (redoType == "Add") {
-                drawnItems[(node.userData as NodeData).id] = node
-                this.children.add(node)
-            } else {
-                drawnItems.remove((node.userData as NodeData).id)
-                this.children.remove(node)
-            }
-            undoStack.addFirst(Pair(redoType, node))
-        }
+        deselectItemIfSelected()
+        AppData.broadcastRedo()
     }
 
     fun setTool(toolIndex: Int, cursorImage: Image) {
@@ -231,23 +198,19 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     }
 
     fun clearCanvas() {
-        this.children.removeAll(drawnItems.values)
-        undoStack.clear()
-        redoStack.clear()
-        deselectItemIfSelected()
-        AppData.broadcastDelete(drawnItems.values.toList())
-        drawnItems.clear()
+        if (drawnItems.values.isNotEmpty()) {
+            this.children.removeAll(drawnItems.values)
+            deselectItemIfSelected()
+            AppData.broadcastDelete(drawnItems.values.toList())
+            drawnItems.clear()
+        }
     }
 
-    // TODO potential bug where one user deletes one node but that node still exists on the undo/redo stack
-    // This function is called whenever the server has a 
-    // change that needs to be propagated to the clients.
-    fun webUpdateCallback(update: String) {
-        val updateJson = Json.decodeFromString(AppEntitiesSchema.serializer(), update)
-        when (updateJson.operation) {
+    private fun applyUpdateMessage(updateMessage: AppEntitiesSchema, operation: Int) {
+        when (operation) {
             OperationIndex.ADD -> {
-                for (node in updateJson.entities.map {
-                    AppData.deserializeSingle(it, it.id, it.timestamp)
+                for (node in updateMessage.entities.map {
+                    AppData.deserializeSingle(it, it.id, it.timestamp, null)
                 }) {
                     addDrawnNode(node, false)
                 }
@@ -255,19 +218,48 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
 
             OperationIndex.DELETE -> {
                 deselectItemIfSelected()
-                for (entity in updateJson.entities) {
+                for (entity in updateMessage.entities) {
                     drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
                 }
             }
 
             OperationIndex.MODIFY -> {
-                for (entity in updateJson.entities) {
-                    drawnItems[entity.id]?.let { removeDrawnNode(it, false) }
+                // TODO check what happens if move and select
+                for (entity in updateMessage.entities) {
+                    drawnItems[entity.id]?.let {
+                        AppData.deserializeSingle(
+                            entity,
+                            entity.id,
+                            entity.timestamp,
+                            it,
+                        )
+                    }
                 }
-                for (node in updateJson.entities.map {
-                    AppData.deserializeSingle(it, it.id, it.timestamp)
-                }) {
-                    addDrawnNode(node, false)
+            }
+        }
+    }
+
+    // This function is called whenever the server has a 
+    // change that needs to be propagated to the clients.
+    fun webUpdateCallback(update: String) {
+        val updateMessage =
+            Json.decodeFromString(AppEntitiesSchema.serializer(), update)
+        if (updateMessage.undoState == UndoIndex.NONE) {
+            applyUpdateMessage(updateMessage, updateMessage.operation)
+        } else {
+            when (updateMessage.undoState) {
+                UndoIndex.UNDO -> {
+                    var operation = updateMessage.operation
+                    if (updateMessage.operation == OperationIndex.ADD) {
+                        operation = OperationIndex.DELETE
+                    } else if (updateMessage.operation == OperationIndex.DELETE) {
+                        operation = OperationIndex.ADD
+                    }
+                    applyUpdateMessage(updateMessage, operation)
+                }
+
+                UndoIndex.REDO -> {
+                    applyUpdateMessage(updateMessage, updateMessage.operation)
                 }
             }
         }

@@ -8,6 +8,7 @@ import net.codebot.application.components.AppData
 import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.NodeData
 import net.codebot.application.components.AppTextEditor
+import kotlin.math.max
 
 class TextTool(container: HBox) : BaseTool(
     container,
@@ -97,8 +98,18 @@ class TextTool(container: HBox) : BaseTool(
             initY = e.y
         }
         onRemoveSelection()
-        val editor = AppTextEditor(initX, initY, width, height)
-        editor.userData = NodeData(EntityIndex.TEXT, AppData.generateNodeId(), System.currentTimeMillis())
+        val editor = AppTextEditor()
+        editor.translateX = initX
+        editor.translateY = initY
+        editor.previousTranslateX = initX
+        editor.previousTranslateY = initY
+        editor.prefWidth = max(width, 180.0)
+        editor.prefHeight = max(height, 50.0)
+        editor.userData = NodeData(
+            EntityIndex.TEXT,
+            AppData.generateNodeId(),
+            System.currentTimeMillis()
+        )
         canvasReference.addDrawnNode(editor)
     }
 
