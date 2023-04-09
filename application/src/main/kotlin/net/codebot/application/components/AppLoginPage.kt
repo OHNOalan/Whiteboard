@@ -19,8 +19,18 @@ import java.net.URLEncoder
 import java.util.prefs.Preferences
 
 
-class AppLoginPage(layout: AppLayout) : GridPane() {
-    private var layoutReference: AppLayout = layout
+/**
+ * Creates the login page for the whiteboard app.
+ *
+ * @property layoutReference Reference to the layout object for the app.
+ * @property host The url (without http://) of the whiteboard server.
+ * @property port The port that the whiteboard server accepts websocket connections on.
+ */
+class AppLoginPage(
+    private val layoutReference: AppLayout,
+    private val host: String,
+    private val port: Int
+) : GridPane() {
     private val charset = "UTF-8"
 
     init {
@@ -153,8 +163,14 @@ class AppLoginPage(layout: AppLayout) : GridPane() {
         this.add(hbLoginButton, 1, 5)
     }
 
+    /**
+     * Creates and sends an HTTP request to the server to log in/register account.
+     *
+     * @param urlRoute The route of the login page (following the host url).
+     * @param urlParams The arguments of the HTTP request (username and password).
+     */
     private fun httpRequest(urlRoute: String, urlParams: String): AppResponseSchema {
-        val urlHost = "http://whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io:8080"
+        val urlHost = "http://$host:$port"
         val urlText = "$urlHost$urlRoute?$urlParams"
         val url = URL(urlText)
 

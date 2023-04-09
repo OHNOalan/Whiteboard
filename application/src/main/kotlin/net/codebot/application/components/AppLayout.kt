@@ -18,18 +18,29 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.util.prefs.Preferences
 
-class AppLayout(stage: Stage) {
+/**
+ * Initiates the websocket connection with the server and sets up the proper scene on
+ * app start.
+ *
+ * The host and port of the whiteboard server are values in this class.
+ *
+ * @property stageReference A reference to the stage of the entire whiteboard app.
+ */
+class AppLayout(private val stageReference: Stage) {
+    // Set url and port of the server here
+    private val host: String = "whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io"
+    private val port: Int = 8080
+
     private var username: String = ""
-    private val stageReference: Stage = stage
     private var whiteboard: BorderPane = BorderPane()
     private val loginPage: GridPane
     private val sceneReference: Scene = Scene(Pane(), 640.0, 480.0)
     private val appCanvas: AppCanvas = AppCanvas(whiteboard)
 
     init {
-        stage.scene = sceneReference
+        stageReference.scene = sceneReference
 
-        loginPage = AppLoginPage(this)
+        loginPage = AppLoginPage(this, host, port)
         // if there's no token load login page
         val token = Preferences.userRoot().get("token", "Token")
         if (token == "Token") {
@@ -37,6 +48,12 @@ class AppLayout(stage: Stage) {
         }
     }
 
+    /**
+     * Initiates the websocket connection with the server. The connection stays active
+     * for the entire lifetime of the app and automatically closes on stopping.
+     *
+     * The websocket runs in a separate thread in order to not block the user's actions.
+     */
     private fun startSocketConnection() {
         // set up Websocket client
         val client = HttpClient(CIO) {
@@ -45,15 +62,13 @@ class AppLayout(stage: Stage) {
 
         val webSocketThread = GlobalScope.launch {
             runBlocking {
-                client.webSocket(
-                    method = HttpMethod.Get,
-                    host = "whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io",
+                client.webSocket(method = HttpMethod.Get,
+                    host = host,
                     path = "/sync",
-                    port = 8080,
+                    port = port,
                     request = {
                         // Set WebSocket headers or options if needed
-                    }
-                ) {
+                    }) {
                     AppData.registerSocket(this)
                     // Called when a message is received from the WebSocket
                     for (frame in incoming) {
@@ -75,6 +90,11 @@ class AppLayout(stage: Stage) {
         })
     }
 
+    /**
+     * Sets the appropriate window size and elements depending on the current page
+     * being shown.
+     * @param sceneIndex Which scene is currently being shown.
+     */
     private fun setScene(sceneIndex: SceneIndex) {
         when (sceneIndex) {
             SceneIndex.WHITEBOARD -> {
@@ -96,6 +116,11 @@ class AppLayout(stage: Stage) {
         }
     }
 
+    /**
+     * Sets the username of the current user. Changes the scene and calls
+     * `startSocketConnection()` to start the main websocket connection if necessary.
+     * @param user The username to be set.
+     */
     fun setUsername(user: String) {
         username = user
 
@@ -109,15 +134,24 @@ class AppLayout(stage: Stage) {
         }
     }
 
+    /**
+     * @return The username of the current user.
+     */
     fun getUsername(): String {
         return username
     }
 
+    /**
+     * Logs the current user out.
+     */
     fun logout() {
         Preferences.userRoot().clear()
         setUsername("")
     }
 
+    /**
+     * Sets the window to display the center of the whole stage.
+     */
     private fun centerStage() {
         val bounds: Rectangle2D = Screen.getPrimary().visualBounds
         val centerX: Double =
