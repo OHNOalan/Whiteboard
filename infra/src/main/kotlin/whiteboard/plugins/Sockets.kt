@@ -1,17 +1,56 @@
 package whiteboard.plugins
 
-import io.ktor.server.websocket.*
-import io.ktor.websocket.*
-import java.time.Duration
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
+import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
 import whiteboard.*
 import whiteboard.models.EntityControl
+import java.time.Duration
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.collections.LinkedHashSet
 
+
+suspend fun processMessage(
+    receivedMessage: AppEntitiesSchema,
+    operation: Int,
+    usePreviousDescriptor: Boolean = false
+) {
+    when (operation) {
+        OperationIndex.ADD -> {
+            for (entity in receivedMessage.entities) {
+                EntityControl.create(
+                    entity.id,
+                    entity.roomId,
+                    entity.descriptor,
+                    entity.type,
+                    entity.timestamp
+                )
+            }
+        }
+
+        OperationIndex.DELETE -> {
+            for (entity in receivedMessage.entities) {
+                EntityControl.delete(
+                    entity.id
+                )
+            }
+        }
+
+        OperationIndex.MODIFY -> {
+            for (entity in receivedMessage.entities) {
+                var descriptor = entity.descriptor
+                if (usePreviousDescriptor && entity.previousDescriptor != null) {
+                    descriptor = entity.previousDescriptor
+                }
+                EntityControl.modify(
+                    entity.id,
+                    descriptor
+                )
+            }
+        }
+    }
+}
 
 fun Application.configureSockets() {
     install(WebSockets) {
@@ -54,48 +93,37 @@ fun Application.configureSockets() {
                         AppEntitiesSchema.serializer(),
                         receivedText
                     )
-                    when (receivedMessage.operation) {
-                        OperationIndex.ADD -> {
-                            for (entity in receivedMessage.entities) {
-                                EntityControl.create(
-                                    entity.id,
-                                    entity.roomId,
-                                    entity.descriptor,
-                                    entity.type,
-                                    entity.timestamp
-                                )
+                    if (receivedMessage.operation == OperationIndex.UNDO) {
+                        broadcastAll = true
+                        responseText = null
+                        val message = undoRedoStacks[123]?.popUndoMessage()
+                        if (message != null) {
+                            responseText = Json.encodeToString(
+                                AppEntitiesSchema.serializer(),
+                                message
+                            )
+                            var operation = OperationIndex.MODIFY
+                            if (message.operation == OperationIndex.ADD) {
+                                operation = OperationIndex.DELETE
+                            } else if (message.operation == OperationIndex.DELETE) {
+                                operation = OperationIndex.ADD
                             }
-                            undoRedoStacks[123]?.addToUndoStack(receivedMessage)
+                            processMessage(message, operation, true)
                         }
-
-                        OperationIndex.DELETE -> {
-                            for (entity in receivedMessage.entities) {
-                                EntityControl.delete(
-                                    entity.id
-                                )
-                            }
-                            undoRedoStacks[123]?.addToUndoStack(receivedMessage)
+                    } else if (receivedMessage.operation == OperationIndex.REDO) {
+                        broadcastAll = true
+                        responseText = null
+                        val message = undoRedoStacks[123]?.popRedoMessage()
+                        if (message != null) {
+                            responseText = Json.encodeToString(
+                                AppEntitiesSchema.serializer(),
+                                message
+                            )
+                            processMessage(message, message.operation)
                         }
-
-                        OperationIndex.MODIFY -> {
-                            for (entity in receivedMessage.entities) {
-                                EntityControl.modify(
-                                    entity.id,
-                                    entity.descriptor
-                                )
-                            }
-                            undoRedoStacks[123]?.addToUndoStack(receivedMessage)
-                        }
-
-                        OperationIndex.UNDO -> {
-                            responseText = undoRedoStacks[123]?.popUndoMessage()
-                            broadcastAll = true
-                        }
-
-                        OperationIndex.REDO -> {
-                            responseText = undoRedoStacks[123]?.popRedoMessage()
-                            broadcastAll = true
-                        }
+                    } else {
+                        processMessage(receivedMessage, receivedMessage.operation)
+                        undoRedoStacks[123]?.addToUndoStack(receivedMessage)
                     }
                     if (responseText != null) {
                         println("Response:")

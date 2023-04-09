@@ -12,7 +12,7 @@ import net.codebot.application.components.tools.PenTool
 import kotlin.math.roundToInt
 
 
-class PenStyles(styleBar: AppStylebar, penTool : PenTool) : BaseStyles(styleBar) {
+class PenStyles(styleBar: AppStylebar, penTool: PenTool) : BaseStyles(styleBar) {
     init {
         val colorPickerContainer = HBox()
         val colorPicker = ColorPicker()

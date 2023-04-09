@@ -20,7 +20,7 @@ object AppData {
         val entities = mutableListOf<AppEntitySchema>()
         for (node in nodes) {
             val type = (node.userData as NodeData).type
-            entities.add(AppEntitySchema("", 0, serializeSingle(node), type, 0))
+            entities.add(AppEntitySchema("", 0, serializeSingle(node), null, type, 0))
         }
         return Json.encodeToString(
             AppEntitiesSchema.serializer(),
@@ -33,7 +33,7 @@ object AppData {
             Json.decodeFromString(AppEntitiesSchema.serializer(), entities)
         val decoded = mutableListOf<Node>()
         for (entity in appEntities.entities) {
-            decoded.add(deserializeSingle(entity, null, null, null))
+            decoded.add(deserializeSingle(entity, null, null, null, entity.descriptor))
         }
         return decoded
     }
@@ -116,15 +116,15 @@ object AppData {
     }
 
     fun broadcastAdd(nodes: List<Node>) {
-        broadcast(nodes, OperationIndex.ADD)
+        broadcast(nodesToAppEntitySchemas(nodes), OperationIndex.ADD)
     }
 
     fun broadcastDelete(nodes: List<Node>) {
-        broadcast(nodes, OperationIndex.DELETE)
+        broadcast(nodesToAppEntitySchemas(nodes), OperationIndex.DELETE)
     }
 
-    fun broadcastModify(nodes: List<Node>) {
-        broadcast(nodes, OperationIndex.MODIFY)
+    fun broadcastModify(entitySchemas: List<AppEntitySchema>) {
+        broadcast(entitySchemas, OperationIndex.MODIFY)
     }
 
     fun broadcastUndo() {
@@ -150,20 +150,29 @@ object AppData {
         appLayout = appLayoutInstance
     }
 
-    private fun broadcast(nodes: List<Node>, operation: Int) {
+    fun nodeToAppEntitySchema(node: Node): AppEntitySchema {
+        val nodeData = node.userData as NodeData
+        return AppEntitySchema(
+            nodeData.id,
+            123,
+            serializeSingle(node),
+            null,
+            nodeData.type,
+            nodeData.timestamp
+        )
+    }
+
+    private fun nodesToAppEntitySchemas(nodes: List<Node>): List<AppEntitySchema> {
         val entities = mutableListOf<AppEntitySchema>()
         for (node in nodes) {
-            val nodeData = node.userData as NodeData
             entities.add(
-                AppEntitySchema(
-                    nodeData.id,
-                    123,
-                    serializeSingle(node),
-                    nodeData.type,
-                    nodeData.timestamp
-                )
+                nodeToAppEntitySchema(node)
             )
         }
+        return entities
+    }
+
+    private fun broadcast(entities: List<AppEntitySchema>, operation: Int) {
         val data = Json.encodeToString(
             AppEntitiesSchema.serializer(),
             AppEntitiesSchema(entities, operation, UndoIndex.NONE)
@@ -190,11 +199,10 @@ object AppData {
     }
 
     private fun serializeSingle(node: Node): String {
-        var result = ""
         when ((node.userData as NodeData).type) {
             EntityIndex.LINE -> {
                 val line = node as Polyline
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppLineSchema.serializer(),
                     AppLineSchema(line.stroke.toString(), line.strokeWidth, line.points)
                 )
@@ -202,7 +210,7 @@ object AppData {
 
             EntityIndex.RECTANGLE -> {
                 val rectangle = node as Rectangle
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppRectangleSchema.serializer(),
                     AppRectangleSchema(
                         rectangle.translateX,
@@ -217,7 +225,7 @@ object AppData {
 
             EntityIndex.ELLIPSE -> {
                 val ellipse = node as Ellipse
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppEllipseSchema.serializer(),
                     AppEllipseSchema(
                         ellipse.centerX,
@@ -232,7 +240,7 @@ object AppData {
 
             EntityIndex.TEXT -> {
                 val text = node as AppTextEditor
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppTextSchema.serializer(),
                     AppTextSchema(
                         text.translateX,
@@ -246,7 +254,7 @@ object AppData {
 
             EntityIndex.SEGMENT -> {
                 val segment = node as Line
-                result = Json.encodeToString(
+                return Json.encodeToString(
                     AppSegmentSchema.serializer(),
                     AppSegmentSchema(
                         segment.stroke.toString(),
@@ -259,14 +267,15 @@ object AppData {
                 )
             }
         }
-        return result
+        return ""
     }
 
     fun deserializeSingle(
         entity: AppEntitySchema,
         id: String?,
         timestamp: Long?,
-        node: Node?
+        node: Node?,
+        descriptor: String,
     ): Node {
         val nodeId = id ?: generateNodeId()
         val nodeTimestamp = timestamp ?: System.currentTimeMillis()
@@ -276,7 +285,7 @@ object AppData {
                 deserializeLine(
                     Json.decodeFromString(
                         AppLineSchema.serializer(),
-                        entity.descriptor
+                        descriptor
                     ), nodeId, nodeTimestamp, target
                 )
                 return target
@@ -287,7 +296,7 @@ object AppData {
                 deserializeRectangle(
                     Json.decodeFromString(
                         AppRectangleSchema.serializer(),
-                        entity.descriptor
+                        descriptor
                     ), nodeId, nodeTimestamp, target
                 )
                 return target
@@ -298,7 +307,7 @@ object AppData {
                 deserializeEllipse(
                     Json.decodeFromString(
                         AppEllipseSchema.serializer(),
-                        entity.descriptor
+                        descriptor
                     ), nodeId, nodeTimestamp, target
                 )
                 return target
@@ -310,7 +319,7 @@ object AppData {
                 deserializeText(
                     Json.decodeFromString(
                         AppTextSchema.serializer(),
-                        entity.descriptor
+                        descriptor
                     ), nodeId, nodeTimestamp, target
                 )
                 return target
@@ -321,7 +330,7 @@ object AppData {
                 deserializeSegment(
                     Json.decodeFromString(
                         AppSegmentSchema.serializer(),
-                        entity.descriptor
+                        descriptor
                     ), nodeId, nodeTimestamp, target
                 )
                 return target

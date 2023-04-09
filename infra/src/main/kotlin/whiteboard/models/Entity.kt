@@ -11,6 +11,7 @@ data class Entity(
     val id: String,
     val roomId: Int,
     val descriptor: String,
+    val previousDescriptor: String?,
     val type: String,
     val timestamp: Long
 )
@@ -29,6 +30,7 @@ object EntityControl {
         id = row[Entities.id],
         roomId = row[Entities.roomId],
         descriptor = row[Entities.descriptor],
+        previousDescriptor = null,
         type = row[Entities.type],
         timestamp = row[Entities.timestamp]
     )

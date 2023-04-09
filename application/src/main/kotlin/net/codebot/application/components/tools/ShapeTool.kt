@@ -13,16 +13,16 @@ import net.codebot.application.components.tools.styles.ShapeStyles
 import kotlin.math.abs
 import kotlin.math.min
 
-class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
+class ShapeTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/shapes.png",
     "file:src/main/assets/cursors/shapes.png",
     "Shape",
     ToolIndex.SHAPE,
 ) {
-    override val stylesControl = ShapeStyles(stylebar, this)
-    private lateinit var rectangle : Rectangle
-    private lateinit var ellipse : Ellipse
+    override val stylesControl = ShapeStyles(styleBar, this)
+    private lateinit var rectangle: Rectangle
+    private lateinit var ellipse: Ellipse
     private var startX = 0.0
     private var startY = 0.0
     var lineColor: Color = Color.BLACK
@@ -40,7 +40,11 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         startY = y
         rectangle.translateX = x
         rectangle.translateY = y
-        rectangle.userData = NodeData(EntityIndex.RECTANGLE, AppData.generateNodeId(), System.currentTimeMillis())
+        rectangle.userData = NodeData(
+            EntityIndex.RECTANGLE,
+            AppData.generateNodeId(),
+            System.currentTimeMillis()
+        )
         canvasReference.children.add(rectangle)
     }
 
@@ -51,7 +55,11 @@ class ShapeTool(container: HBox, stylebar: AppStylebar) : BaseTool (
         ellipse.fill = if (fillShape) lineColor else null
         ellipse.centerX = x
         ellipse.centerY = y
-        ellipse.userData = NodeData(EntityIndex.ELLIPSE, AppData.generateNodeId(), System.currentTimeMillis())
+        ellipse.userData = NodeData(
+            EntityIndex.ELLIPSE,
+            AppData.generateNodeId(),
+            System.currentTimeMillis()
+        )
         canvasReference.children.add(ellipse)
     }
 

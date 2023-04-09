@@ -1,6 +1,5 @@
 package net.codebot.application.components.menuItems.fileMenu
 
-import javafx.event.ActionEvent
 import javafx.scene.control.Menu
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyCodeCombination
@@ -12,16 +11,25 @@ import java.io.File
 
 
 class SaveMenuItem(menu: Menu, canvas: AppCanvas) :
-    BaseMenuItem(menu, "Save", KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)) {
+    BaseMenuItem(
+        menu,
+        "Save",
+        KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN)
+    ) {
 
     private var canvasReference: AppCanvas = canvas
     var savePath: String? = null
-    
-    override fun onItemClicked(e: ActionEvent) {
+
+    override fun onItemClicked() {
         if (savePath == null) {
             val fileChooser = FileChooser()
             fileChooser.title = "Save As"
-            fileChooser.extensionFilters.addAll(FileChooser.ExtensionFilter("Whiteboard", "*.wb"))
+            fileChooser.extensionFilters.addAll(
+                FileChooser.ExtensionFilter(
+                    "Whiteboard",
+                    "*.wb"
+                )
+            )
             val selectedFile = fileChooser.showSaveDialog(null)
             if (selectedFile != null) {
                 selectedFile.bufferedWriter().use { out ->

@@ -4,19 +4,18 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.HBox
 import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
-import net.codebot.application.components.AppData
-import net.codebot.application.components.EntityIndex
-import net.codebot.application.components.NodeData
-import net.codebot.application.components.AppTextEditor
+import net.codebot.application.components.*
+import net.codebot.application.components.tools.styles.TextStyles
 import kotlin.math.max
 
-class TextTool(container: HBox) : BaseTool(
+class TextTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/text.png",
     "file:src/main/assets/cursors/text.png",
     "Text",
     ToolIndex.TEXT,
 ) {
+    override val stylesControl = TextStyles(styleBar)
     private lateinit var selectionRectangle: Rectangle
     private val selectionLineColor: Color = Color.DODGERBLUE
     private val lineWidth: Double = 2.0
@@ -84,7 +83,7 @@ class TextTool(container: HBox) : BaseTool(
 
     override fun canvasMouseReleased(e: MouseEvent) {
         var width: Double
-        var height: Double
+        val height: Double
         if (e.x > initX) {
             width = e.x - initX
         } else {

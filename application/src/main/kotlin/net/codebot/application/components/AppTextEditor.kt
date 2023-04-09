@@ -2,8 +2,9 @@ package net.codebot.application.components
 
 import javafx.beans.value.ChangeListener
 import javafx.scene.web.HTMLEditor
+import kotlinx.serialization.json.Json
 
-class AppTextEditor() : HTMLEditor() {
+class AppTextEditor : HTMLEditor() {
     var previousTranslateX: Double? = null
     var previousTranslateY: Double? = null
     private lateinit var previousText: String
@@ -29,7 +30,15 @@ class AppTextEditor() : HTMLEditor() {
                 // HTMLEditor has lost focus
                 hideToolBar()
                 if (previousText != this.htmlText) {
-                    AppData.broadcastModify(listOf(this))
+                    val message = AppData.nodeToAppEntitySchema(this)
+                    val entityData = Json.decodeFromString(
+                        AppTextSchema.serializer(),
+                        message.descriptor
+                    )
+                    entityData.htmlText = previousText
+                    message.previousDescriptor =
+                        Json.encodeToString(AppTextSchema.serializer(), entityData)
+                    AppData.broadcastModify(listOf(message))
                 }
             }
         }

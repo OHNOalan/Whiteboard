@@ -2,7 +2,6 @@ package whiteboard
 
 import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import whiteboard.models.Entity
 import java.util.*
 
@@ -18,7 +17,7 @@ data class AppResponseSchema(val success: Boolean, val message: String)
 
 class ClientConnection(val session: DefaultWebSocketSession, val roomId: Int)
 
-class UndoRedoStack() {
+class UndoRedoStack {
     private val undoStack =
         Collections.synchronizedList<AppEntitiesSchema>(LinkedList())
     private val redoStack =
@@ -29,21 +28,21 @@ class UndoRedoStack() {
         undoStack.add(action)
     }
 
-    fun popUndoMessage(): String? {
+    fun popUndoMessage(): AppEntitiesSchema? {
         val message = undoStack.removeLastOrNull()
         if (message != null) {
             redoStack.add(message)
         }
         message?.undoState = UndoIndex.UNDO
-        return message?.let { Json.encodeToString(AppEntitiesSchema.serializer(), it) }
+        return message
     }
 
-    fun popRedoMessage(): String? {
+    fun popRedoMessage(): AppEntitiesSchema? {
         val message = redoStack.removeLastOrNull()
         if (message != null) {
             undoStack.add(message)
         }
         message?.undoState = UndoIndex.REDO
-        return message?.let { Json.encodeToString(AppEntitiesSchema.serializer(), it) }
+        return message
     }
 }

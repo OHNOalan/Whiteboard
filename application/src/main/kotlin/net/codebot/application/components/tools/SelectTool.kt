@@ -8,18 +8,24 @@ import javafx.scene.shape.Ellipse
 import javafx.scene.shape.Line
 import javafx.scene.shape.Polyline
 import javafx.scene.shape.Rectangle
-import net.codebot.application.components.*
+import net.codebot.application.components.AppStylebar
+import net.codebot.application.components.AppTextEditor
+import net.codebot.application.components.EntityIndex
+import net.codebot.application.components.NodeData
+import net.codebot.application.components.tools.styles.SelectStyles
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
+class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/selection.png",
     "file:src/main/assets/cursors/selection.png",
     "Select",
-    ToolIndex.SELECTION,
+    ToolIndex.SELECT,
 ) {
+    override val stylesControl = SelectStyles(styleBar)
+
     // selectionRectangle is for making the selection
     // selectedRectangle is for displaying the resulting selection
     private lateinit var selectionRectangle: Rectangle
@@ -113,7 +119,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
             canvasReference.children.remove(selectedRectangle)
             corners.forEach { canvasReference.children.remove(it) }
 
-            // re-enable texteditor nodes
+            // re-enable text editor nodes
             if (editing) {
                 selectedNodes.map {
                     if (it is AppTextEditor) {
@@ -352,7 +358,7 @@ class SelectionTool(container: HBox, var stylebar: AppStylebar) : BaseTool(
                 modifiedNodes.add(node)
             }
             if (modifiedNodes.size > 0) {
-                AppData.broadcastModify(modifiedNodes)
+//                AppData.broadcastModify(modifiedNodes)
             }
         }
     }

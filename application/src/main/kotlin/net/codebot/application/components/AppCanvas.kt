@@ -14,7 +14,7 @@ import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import kotlinx.serialization.json.Json
 import net.codebot.application.components.tools.BaseTool
-import net.codebot.application.components.tools.SelectionTool
+import net.codebot.application.components.tools.SelectTool
 import net.codebot.application.components.tools.ToolIndex
 import java.awt.image.BufferedImage
 import java.io.File
@@ -110,7 +110,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
 
     // Deselect items in undo redo or when delete is synchronized
     private fun deselectItemIfSelected() {
-        val selectionTool = tools[ToolIndex.SELECTION] as SelectionTool
+        val selectionTool = tools[ToolIndex.SELECT] as SelectTool
         selectionTool.deselect()
     }
 
@@ -199,18 +199,28 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
 
     fun clearCanvas() {
         if (drawnItems.values.isNotEmpty()) {
-            this.children.removeAll(drawnItems.values)
+            this.children.removeAll(drawnItems.values.toSet())
             deselectItemIfSelected()
             AppData.broadcastDelete(drawnItems.values.toList())
             drawnItems.clear()
         }
     }
 
-    private fun applyUpdateMessage(updateMessage: AppEntitiesSchema, operation: Int) {
+    private fun applyUpdateMessage(
+        updateMessage: AppEntitiesSchema,
+        operation: Int,
+        usePreviousDescriptor: Boolean = false
+    ) {
         when (operation) {
             OperationIndex.ADD -> {
                 for (node in updateMessage.entities.map {
-                    AppData.deserializeSingle(it, it.id, it.timestamp, null)
+                    AppData.deserializeSingle(
+                        it,
+                        it.id,
+                        it.timestamp,
+                        null,
+                        it.descriptor
+                    )
                 }) {
                     addDrawnNode(node, false)
                 }
@@ -226,12 +236,17 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
             OperationIndex.MODIFY -> {
                 // TODO check what happens if move and select
                 for (entity in updateMessage.entities) {
+                    var descriptor = entity.descriptor
+                    if (usePreviousDescriptor && entity.previousDescriptor != null) {
+                        descriptor = entity.previousDescriptor!!
+                    }
                     drawnItems[entity.id]?.let {
                         AppData.deserializeSingle(
                             entity,
                             entity.id,
                             entity.timestamp,
                             it,
+                            descriptor
                         )
                     }
                 }
@@ -255,7 +270,7 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
                     } else if (updateMessage.operation == OperationIndex.DELETE) {
                         operation = OperationIndex.ADD
                     }
-                    applyUpdateMessage(updateMessage, operation)
+                    applyUpdateMessage(updateMessage, operation, true)
                 }
 
                 UndoIndex.REDO -> {

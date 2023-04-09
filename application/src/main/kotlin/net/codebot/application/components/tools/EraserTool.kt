@@ -8,7 +8,7 @@ import javafx.scene.shape.Circle
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.tools.styles.EraserStyles
 
-class EraserTool(container: HBox, stylebar: AppStylebar) : BaseTool(
+class EraserTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/eraser.png",
     "file:src/main/assets/cursors/eraser.png",
@@ -22,7 +22,7 @@ class EraserTool(container: HBox, stylebar: AppStylebar) : BaseTool(
             pointer.radius = value + radiusOffset
         }
     private val pointer = Circle(-100.0, -100.0, lineWidth + radiusOffset)
-    override val stylesControl = EraserStyles(stylebar, this)
+    override val stylesControl = EraserStyles(styleBar, this)
 
     init {
         pointer.fill = null
