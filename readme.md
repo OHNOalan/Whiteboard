@@ -1,18 +1,17 @@
-Single Desktop Application
-(c) 2022 Jeff Avery
+# Whiteboard
+A whiteboard application.
 
-Demonstrates how to structure a multi-project build in Gradle.
-It includes a main JavaFX project in the application/ folder,
-a console application in console/, and a shared library 
-in the shared/ folder which extracts system information (like
-the name of the current user). 
 
-Supported gradle tasks:
+<a href="https://www.flaticon.com/free-icons/pen" title="pen icons">Pen icons created by Freepik - Flaticon</a>
 
-| Tasks   | Description                                          |
-|:--------|:-----------------------------------------------------|
-| clean   | Remove build/ directory                              |
-| build   | Build the application project in build/ directory    |
-| run     | Run the application or console project               |
-| distZip | Create run scripts in application/build/distribution |
-| distTar | Create run scripts in application/build/distribution |
+<a href="https://www.flaticon.com/free-icons/logout" title="logout icons">Logout icons created by Pixel perfect - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/line" title="line icons">Line icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/eraser" title="eraser icons">Eraser icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/shapes" title="shapes icons">Shapes icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/text" title="text icons">Text icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/selection" title="selection icons">Selection icons created by Pixel perfect - Flaticon</a>
