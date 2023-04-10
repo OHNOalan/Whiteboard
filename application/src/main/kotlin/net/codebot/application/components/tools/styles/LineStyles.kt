@@ -11,7 +11,11 @@ import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.LineTool
 import kotlin.math.roundToInt
 
-
+/**
+ * Creates the styles for the line tool.
+ * @param styleBar The style bar to add the styles to.
+ * @param lineTool A reference to the line tool.
+ */
 class LineStyles(styleBar: AppStylebar, lineTool: LineTool) : BaseStyles(styleBar) {
     init {
         val colorPickerContainer = HBox()

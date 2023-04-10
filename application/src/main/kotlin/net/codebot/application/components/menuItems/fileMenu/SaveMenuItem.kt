@@ -9,7 +9,11 @@ import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.menuItems.BaseMenuItem
 import java.io.File
 
-
+/**
+ * Creates the menu item to save the canvas as a whiteboard file. Shortcut: CTRL+S
+ * @param menu The menu to add this item to.
+ * @param canvas The main canvas of the whiteboard.
+ */
 class SaveMenuItem(menu: Menu, canvas: AppCanvas) :
     BaseMenuItem(
         menu,
@@ -20,6 +24,10 @@ class SaveMenuItem(menu: Menu, canvas: AppCanvas) :
     private var canvasReference: AppCanvas = canvas
     var savePath: String? = null
 
+    /**
+     * Saves a whiteboard file to disk when the menu item is clicked.
+     * If needed, opens the dialogue to select a file name first.
+     */
     override fun onItemClicked() {
         if (savePath == null) {
             val fileChooser = FileChooser()

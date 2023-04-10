@@ -2,7 +2,6 @@ module application {
     requires kotlin.stdlib;
     requires javafx.controls;
     requires kotlinx.coroutines.core.jvm;
-    requires shared;
     requires javafx.web;
     requires java.desktop;
     requires io.ktor.client.core;

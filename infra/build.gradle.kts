@@ -7,8 +7,8 @@ plugins {
 group = "whiteboard"
 version = "0.0.1"
 
-val exposed_version: String by project
-val h2_version: String by project
+val exposed_version = "0.41.1"
+val h2_version = "2.1.214"
 
 application {
     //mainModule.set("infra")

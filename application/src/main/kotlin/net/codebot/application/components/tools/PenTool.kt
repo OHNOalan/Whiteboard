@@ -12,7 +12,12 @@ import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.NodeData
 import net.codebot.application.components.tools.styles.PenStyles
 
-
+/**
+ * The set of properties for the pen tool.
+ * @param container The container to add the tool to.
+ * @param styleBar The style bar for this tool where all customization options are
+ * displayed.
+ */
 class PenTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/pen.png",
@@ -62,9 +67,7 @@ class PenTool(container: HBox, styleBar: AppStylebar) : BaseTool(
             )
         )
         currentPolyline.userData = NodeData(
-            EntityIndex.LINE,
-            AppData.generateNodeId(),
-            System.currentTimeMillis()
+            EntityIndex.LINE, AppData.generateNodeId(), System.currentTimeMillis()
         )
         // We let the current line be a preview only and will only commit if mouse is released
         canvasReference.children.add(currentPolyline)

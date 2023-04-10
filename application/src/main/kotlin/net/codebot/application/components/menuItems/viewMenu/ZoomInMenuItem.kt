@@ -7,7 +7,11 @@ import javafx.scene.input.KeyCombination
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.menuItems.BaseMenuItem
 
-
+/**
+ * Creates the menu item to zoom in on the canvas. Shortcut: CTRL+EQUALS
+ * @param menu The menu to add this item to.
+ * @param canvas The main canvas of the whiteboard.
+ */
 class ZoomInMenuItem(menu: Menu, canvas: AppCanvas) :
     BaseMenuItem(
         menu,
@@ -17,6 +21,9 @@ class ZoomInMenuItem(menu: Menu, canvas: AppCanvas) :
 
     private var canvasReference: AppCanvas = canvas
 
+    /**
+     * Zooms in on the canvas when the menu item is clicked.
+     */
     override fun onItemClicked() {
         canvasReference.zoomIn()
     }

@@ -7,7 +7,11 @@ import javafx.scene.input.KeyCombination
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.menuItems.BaseMenuItem
 
-
+/**
+ * Creates the menu item to reset the zoom level. Shortcut: CTRL+R
+ * @param menu The menu to add this item to.
+ * @param canvas The main canvas of the whiteboard.
+ */
 class ResetZoomMenuItem(menu: Menu, canvas: AppCanvas) :
     BaseMenuItem(
         menu,
@@ -17,6 +21,9 @@ class ResetZoomMenuItem(menu: Menu, canvas: AppCanvas) :
 
     private var canvasReference: AppCanvas = canvas
 
+    /**
+     * Resets the zoom level of the canvas when the menu item is clicked.
+     */
     override fun onItemClicked() {
         canvasReference.resetZoom()
     }

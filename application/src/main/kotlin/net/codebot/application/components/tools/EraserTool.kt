@@ -8,6 +8,12 @@ import javafx.scene.shape.Circle
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.tools.styles.EraserStyles
 
+/**
+ * The set of properties for the eraser tool.
+ * @param container The container to add the tool to.
+ * @param styleBar The style bar for this tool where all customization options are
+ * displayed.
+ */
 class EraserTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/eraser.png",
@@ -30,6 +36,9 @@ class EraserTool(container: HBox, styleBar: AppStylebar) : BaseTool(
         pointer.isPickOnBounds = false
     }
 
+    /**
+     * Deletes nodes from the canvas.
+     */
     private fun eraseNodes() {
         val toBeErased = mutableListOf<Node>()
         for (node in canvasReference.children) {
