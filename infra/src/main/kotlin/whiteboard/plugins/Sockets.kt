@@ -11,7 +11,14 @@ import whiteboard.models.RoomControl
 import java.time.Duration
 import java.util.*
 
-
+/**
+ * Accept list of entities and assignment operation to Entity Controller
+ * @param receivedMessage The serialized information of list entities.
+ * @param operation The type of operation for entities.
+ * @param roomId The roomId entities operating on.
+ * @param usePreviousDescriptor Only used for a modify action. Used for undo/redo
+ * to track the previous state of the item.
+ */
 suspend fun processMessage(
     receivedMessage: AppEntitiesSchema,
     operation: Int,
@@ -54,6 +61,10 @@ suspend fun processMessage(
     }
 }
 
+
+/**
+ * Endpoints handling Entities request and pass assignment to Controller for entities
+ */
 fun Application.configureSockets() {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)

@@ -9,7 +9,9 @@ import whiteboard.AppUtils
 import whiteboard.models.RoomControl
 import whiteboard.models.UserControl
 
-
+/**
+ * Endpoints handling User and Room request and pass assignment to Controller for entities
+ */
 fun Application.configureEndpoints() {
     routing {
         get("/") {
