@@ -24,7 +24,6 @@ class TextTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     override val stylesControl = TextStyles(styleBar)
     private lateinit var selectionRectangle: Rectangle
     private val selectionLineColor: Color = Color.DODGERBLUE
-    private val lineWidth: Double = 2.0
     private var initX = 0.0
     private var initY = 0.0
 
@@ -37,14 +36,12 @@ class TextTool(container: HBox, styleBar: AppStylebar) : BaseTool(
         x: Double,
         y: Double,
         stroke: Color,
-        strokeWidth: Double = lineWidth,
-        fill: Color? = null
     ): Rectangle {
         val rectangle = Rectangle()
         rectangle.stroke = stroke
-        rectangle.strokeWidth = strokeWidth
+        rectangle.strokeWidth = 1.0
         rectangle.isPickOnBounds = false
-        rectangle.fill = fill
+        rectangle.fill = null
         initX = x
         initY = y
         rectangle.translateX = x
@@ -85,11 +82,11 @@ class TextTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     override fun canvasMousePressed(e: MouseEvent) {
         initX = e.x
         initY = e.y
-        selectionRectangle = createBoundingRectangle(e.x, e.y, selectionLineColor, strokeWidth = 1.0)
+        selectionRectangle = createBoundingRectangle(e.x, e.y, selectionLineColor)
     }
 
     override fun canvasMouseReleased(e: MouseEvent) {
-        var width: Double
+        val width: Double
         val height: Double
         if (e.x > initX) {
             width = e.x - initX

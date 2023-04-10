@@ -7,6 +7,7 @@ import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
 import whiteboard.*
 import whiteboard.models.EntityControl
+import whiteboard.models.RoomControl
 import java.time.Duration
 import java.util.*
 
@@ -14,6 +15,7 @@ import java.util.*
 suspend fun processMessage(
     receivedMessage: AppEntitiesSchema,
     operation: Int,
+    roomId: Int,
     usePreviousDescriptor: Boolean = false
 ) {
     when (operation) {
@@ -21,7 +23,7 @@ suspend fun processMessage(
             for (entity in receivedMessage.entities) {
                 EntityControl.create(
                     entity.id,
-                    entity.roomId,
+                    roomId,
                     entity.descriptor,
                     entity.type,
                     entity.timestamp
@@ -65,23 +67,9 @@ fun Application.configureSockets() {
         val undoRedoStacks = Collections.synchronizedMap<Int, UndoRedoStack>(HashMap())
 
         webSocket("/sync") {
-            val thisConnection = ClientConnection(this, 123)
+            val thisConnection = ClientConnection(this)
             connections += thisConnection
-            if (!undoRedoStacks.containsKey(123)) {
-                undoRedoStacks[123] = UndoRedoStack()
-            }
             try {
-                val data = Json.encodeToString(
-                    AppEntitiesSchema.serializer(),
-                    AppEntitiesSchema(
-                        EntityControl.load(123),
-                        OperationIndex.ADD,
-                        UndoIndex.NONE
-                    )
-                )
-                println("Initial:")
-                println(data)
-                send(data)
                 for (frame in incoming) {
                     frame as? Frame.Text ?: continue
                     val receivedText = frame.readText()
@@ -93,10 +81,31 @@ fun Application.configureSockets() {
                         AppEntitiesSchema.serializer(),
                         receivedText
                     )
-                    if (receivedMessage.operation == OperationIndex.UNDO) {
+                    if (receivedMessage.operation == OperationIndex.JOIN) {
+                        val roomId = RoomControl.getRoomId(receivedMessage.roomCode)
+                        if (roomId != null) {
+                            thisConnection.setRoomId(roomId)
+                            if (!undoRedoStacks.containsKey(roomId)) {
+                                undoRedoStacks[roomId] = UndoRedoStack()
+                            }
+                            val data = Json.encodeToString(
+                                AppEntitiesSchema.serializer(),
+                                AppEntitiesSchema(
+                                    EntityControl.load(roomId),
+                                    OperationIndex.ADD,
+                                    UndoIndex.NONE
+                                )
+                            )
+                            println("Joined Room:")
+                            println(data)
+                            send(data)
+                        }
+                        continue
+                    } else if (receivedMessage.operation == OperationIndex.UNDO) {
                         broadcastAll = true
                         responseText = null
-                        val message = undoRedoStacks[123]?.popUndoMessage()
+                        val message =
+                            undoRedoStacks[thisConnection.getRoomId()]?.popUndoMessage()
                         if (message != null) {
                             responseText = Json.encodeToString(
                                 AppEntitiesSchema.serializer(),
@@ -108,30 +117,48 @@ fun Application.configureSockets() {
                             } else if (message.operation == OperationIndex.DELETE) {
                                 operation = OperationIndex.ADD
                             }
-                            processMessage(message, operation, true)
+                            processMessage(
+                                message,
+                                operation,
+                                thisConnection.getRoomId(),
+                                true
+                            )
                         }
                     } else if (receivedMessage.operation == OperationIndex.REDO) {
                         broadcastAll = true
                         responseText = null
-                        val message = undoRedoStacks[123]?.popRedoMessage()
+                        val message =
+                            undoRedoStacks[thisConnection.getRoomId()]?.popRedoMessage()
                         if (message != null) {
                             responseText = Json.encodeToString(
                                 AppEntitiesSchema.serializer(),
                                 message
                             )
-                            processMessage(message, message.operation)
+                            processMessage(
+                                message,
+                                message.operation,
+                                thisConnection.getRoomId(),
+                            )
                         }
                     } else {
-                        processMessage(receivedMessage, receivedMessage.operation)
-                        undoRedoStacks[123]?.addToUndoStack(receivedMessage)
+                        processMessage(
+                            receivedMessage,
+                            receivedMessage.operation,
+                            thisConnection.getRoomId(),
+                        )
+                        undoRedoStacks[thisConnection.getRoomId()]?.addToUndoStack(
+                            receivedMessage
+                        )
                     }
                     if (responseText != null) {
                         println("Response:")
                         println(responseText)
                         for (connection in connections) {
-                            if (broadcastAll || connection != thisConnection) {
-                                println("Sending...")
-                                connection.session.send(responseText)
+                            if (connection.getRoomId() == thisConnection.getRoomId()) {
+                                if (broadcastAll || connection != thisConnection) {
+                                    println("Sending...")
+                                    connection.session.send(responseText)
+                                }
                             }
                         }
                     }

@@ -348,7 +348,8 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
                 }
                 if (node is AppTextEditor) {
                     if (node.previousTranslateX == node.translateX &&
-                        node.previousTranslateY == node.translateY) {
+                        node.previousTranslateY == node.translateY
+                    ) {
                         continue
                     }
                     node.previousTranslateX = node.translateX

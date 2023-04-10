@@ -6,4 +6,5 @@ object OperationIndex {
     const val MODIFY = 3
     const val UNDO = 4
     const val REDO = 5
+    const val JOIN = 6
 }

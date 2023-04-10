@@ -1,11 +1,7 @@
 package whiteboard
 
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
 import io.ktor.server.testing.*
-import whiteboard.plugins.*
-import kotlin.test.*
+import kotlin.test.Test
 
 class ApplicationTest {
     @Test

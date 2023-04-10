@@ -10,11 +10,6 @@ import javafx.scene.paint.Color
 import javafx.scene.text.Font
 import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
-import kotlinx.serialization.json.Json
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.net.URL
-import java.net.URLConnection
 import java.net.URLEncoder
 import java.util.prefs.Preferences
 
@@ -23,16 +18,10 @@ import java.util.prefs.Preferences
  * Creates the login page for the whiteboard app.
  *
  * @property layoutReference Reference to the layout object for the app.
- * @property host The url (without http://) of the whiteboard server.
- * @property port The port that the whiteboard server accepts websocket connections on.
  */
 class AppLoginPage(
     private val layoutReference: AppLayout,
-    private val host: String,
-    private val port: Int
 ) : GridPane() {
-    private val charset = "UTF-8"
-
     init {
         this.alignment = Pos.CENTER
         this.hgap = 10.0
@@ -54,10 +43,11 @@ class AppLoginPage(
 
         if (token != "Token") {
             try {
-                val response = httpRequest(
-                    "/user/autologin", String.format(
+                val response = AppUtils.httpRequest(
+                    "/user/autologin",
+                    String.format(
                         "token=%s",
-                        URLEncoder.encode(token, charset)
+                        URLEncoder.encode(token, AppSettings.CHARSET)
                     )
                 )
 
@@ -103,11 +93,11 @@ class AppLoginPage(
             val password = passwordBox.text
             val urlParams = String.format(
                 "username=%s&password=%s",
-                URLEncoder.encode(username, charset),
-                URLEncoder.encode(password, charset)
+                URLEncoder.encode(username, AppSettings.CHARSET),
+                URLEncoder.encode(password, AppSettings.CHARSET)
             )
             try {
-                val response = httpRequest(urlRoute, urlParams)
+                val response = AppUtils.httpRequest(urlRoute, urlParams)
 
                 if (response.success) {
                     if (rememberMeCheckbox.isSelected) {
@@ -116,6 +106,7 @@ class AppLoginPage(
                     }
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
+                    AppData.roomCode = response.roomCode
                     layoutReference.setUsername(username)
                 } else {
                     registerError.text = response.message
@@ -137,11 +128,11 @@ class AppLoginPage(
             val password = passwordBox.text
             val urlParams = String.format(
                 "username=%s&password=%s",
-                URLEncoder.encode(username, charset),
-                URLEncoder.encode(password, charset)
+                URLEncoder.encode(username, AppSettings.CHARSET),
+                URLEncoder.encode(password, AppSettings.CHARSET)
             )
             try {
-                val response = httpRequest(urlRoute, urlParams)
+                val response = AppUtils.httpRequest(urlRoute, urlParams)
 
                 if (response.success) {
                     if (rememberMeCheckbox.isSelected) {
@@ -150,6 +141,7 @@ class AppLoginPage(
                     }
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
+                    AppData.roomCode = response.roomCode
                     layoutReference.setUsername(username)
                 } else {
                     loginError.text = response.message
@@ -161,46 +153,5 @@ class AppLoginPage(
             }
         }
         this.add(hbLoginButton, 1, 5)
-    }
-
-    /**
-     * Creates and sends an HTTP request to the server to log in/register account.
-     *
-     * @param urlRoute The route of the login page (following the host url).
-     * @param urlParams The arguments of the HTTP request (username and password).
-     */
-    private fun httpRequest(urlRoute: String, urlParams: String): AppResponseSchema {
-        val urlHost = "http://$host:$port"
-        val urlText = "$urlHost$urlRoute?$urlParams"
-        val url = URL(urlText)
-
-        val httpURLConnection: URLConnection = url.openConnection()
-        httpURLConnection.doOutput = true // triggers POST
-        httpURLConnection.setRequestProperty("Accept-Charset", charset)
-        httpURLConnection.setRequestProperty(
-            "Content-Type",
-            "application/x-www-form-urlencoded;charset=$charset"
-        )
-
-        try {
-            httpURLConnection.getOutputStream()
-                .use { output -> output.write(urlParams.encodeToByteArray()) }
-            var response: AppResponseSchema
-            BufferedReader(
-                InputStreamReader(
-                    httpURLConnection.getInputStream(),
-                    charset
-                )
-            ).use { reader ->
-                response = Json.decodeFromString(
-                    AppResponseSchema.serializer(),
-                    reader.readText()
-                )
-            }
-            return response
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return AppResponseSchema(false, "A network problem has occurred.")
     }
 }

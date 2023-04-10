@@ -23,7 +23,7 @@ import java.nio.IntBuffer
 import javax.imageio.ImageIO
 
 /**
- * Contains the main logic for all the interactable items on the whiteboard, including
+ * Contains the main logic for all the interactive items on the whiteboard, including
  * processing/sending server updates, saving/loading, changing tools, and undo/redo.
  *
  * @param borderPane The main pane where everything is attached to.
@@ -278,12 +278,16 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
     /**
      * Clears the entire canvas. Deletes every item and broadcasts all the deletes to
      * the server, so every user's canvas is also cleared.
+     *
+     * @param broadcast Whether this node was created locally.
      */
-    fun clearCanvas() {
+    fun clearCanvas(broadcast: Boolean = true) {
         if (drawnItems.values.isNotEmpty()) {
             this.children.removeAll(drawnItems.values.toSet())
             deselectItemIfSelected()
-            AppData.broadcastDelete(drawnItems.values.toList())
+            if (broadcast) {
+                AppData.broadcastDelete(drawnItems.values.toList())
+            }
             drawnItems.clear()
         }
     }
