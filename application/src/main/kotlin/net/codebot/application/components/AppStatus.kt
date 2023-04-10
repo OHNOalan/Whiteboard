@@ -12,8 +12,18 @@ import javafx.scene.text.FontWeight
 import javafx.scene.text.Text
 import java.net.URLEncoder
 
-
-class AppStatus(sideBar: VBox, appLayout: AppLayout, appCanvas: AppCanvas) {
+/**
+ * Creates a status component that displays the currently logged-in user
+ * as well as current room code and ability to join/create rooms.
+ * @param sideBar The sidebar to add this status component to.
+ * @param appLayout The layout component of the whiteboard.
+ * @param appCanvas The main canvas of the whiteboard.
+ */
+class AppStatus(
+    sideBar: VBox,
+    appLayout: AppLayout,
+    appCanvas: AppCanvas,
+) {
     private var roomCodeTextField: TextField
     private val canvasReference: AppCanvas = appCanvas
 

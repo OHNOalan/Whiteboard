@@ -1,7 +1,9 @@
 package net.codebot.application.components
 
 object AppSettings {
-    const val HOST: String = "whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io"
+    // Actual deployed host is at "whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io"
+    // Use localhost for testing purposes
+    const val HOST: String = "localhost"
     const val PORT: Int = 8080
     const val CHARSET: String = "UTF-8"
 }
