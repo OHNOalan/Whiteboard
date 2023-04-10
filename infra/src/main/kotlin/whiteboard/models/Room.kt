@@ -6,15 +6,11 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import whiteboard.AppUtils
 import whiteboard.DatabaseFactory.dbQuery
-import whiteboard.models.Users.id
-import whiteboard.models.Users.password
-import whiteboard.models.Users.primaryKey
-import whiteboard.models.Users.username
 
 /**
- * The class of Room Entity for database
- * @param id The unique identifier for Room.
- * @param roomCode The Room access code.
+ * The data class for the room object.
+ * @param id The unique identifier for the room.
+ * @param roomCode The room code.
  */
 data class Room(
     val id: Int,
@@ -22,10 +18,10 @@ data class Room(
 )
 
 /**
- * The Object of Room Entity for database
- * @property id The unique identifier for Room.
- * @property roomCode The username of Room.
- * @property primaryKey The primary key of Entity.
+ * The schema for the rooms table in the database.
+ * @property id The unique identifier for the room.
+ * @property roomCode The room code.
+ * @property primaryKey The primary key of the room.
  */
 object Rooms : Table() {
     val id = integer("id").autoIncrement()
@@ -33,11 +29,14 @@ object Rooms : Table() {
     override val primaryKey = PrimaryKey(id)
 }
 
+/**
+ * The room controller for processing requests and updating the rooms table.
+ */
 object RoomControl {
     /**
-     * Create Room Object given row Info
-     * @param row The row containing all info about Room
-     * @return Room Object
+     * Create a room object given a row info.
+     * @param row The row containing all the info about room.
+     * @return The room object.
      */
     private fun resultToEntity(row: ResultRow) = Room(
         id = row[Rooms.id],
@@ -45,8 +44,8 @@ object RoomControl {
     )
 
     /**
-     * Generate Room Object with random RoomCode
-     * @return roomCode if creating room succeed
+     * Creates a room and returns the room code.
+     * @return The room code.
      */
     suspend fun generateRoom(): String {
         var roomCode: String
@@ -58,17 +57,17 @@ object RoomControl {
     }
 
     /**
-     * Get Room ID given RoomCode
-     * @return ID if searching RoomCode return not null
+     * Get the room ID given a room code.
+     * @return ID if such room code exists.
      */
     suspend fun getRoomId(roomCode: String): Int? {
         return load(roomCode)?.id
     }
 
     /**
-     * Create Room with roomCode
-     * @param roomCode The code of created room
-     * @return Room Entity if creating Room succeed
+     * Create a room with a room code.
+     * @param roomCode The code of the created room.
+     * @return Room object if creating the room is successful.
      */
     private suspend fun create(
         roomCode: String,
@@ -81,9 +80,9 @@ object RoomControl {
     }
 
     /**
-     * Load Room with roomCode
-     * @param roomCode The code of loaded room
-     * @return Room Entity if searching Room succeed
+     * Load a room with the room code.
+     * @param roomCode The room code.
+     * @return Room object if room code exists.
      */
     private suspend fun load(roomCode: String): Room? = dbQuery {
         Rooms.select { Rooms.roomCode eq roomCode }.firstOrNull()

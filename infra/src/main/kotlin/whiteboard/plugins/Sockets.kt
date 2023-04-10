@@ -12,10 +12,10 @@ import java.time.Duration
 import java.util.*
 
 /**
- * Accept list of entities and assignment operation to Entity Controller
- * @param receivedMessage The serialized information of list entities.
+ * Process a list of entities and serialize those entities to the database.
+ * @param receivedMessage The serialized information of entities list.
  * @param operation The type of operation for entities.
- * @param roomId The roomId entities operating on.
+ * @param roomId The roomId that the transaction will operate on.
  * @param usePreviousDescriptor Only used for a modify action. Used for undo/redo
  * to track the previous state of the item.
  */
@@ -63,7 +63,7 @@ suspend fun processMessage(
 
 
 /**
- * Endpoints handling Entities request and pass assignment to Controller for entities
+ * The endpoint for handling real-time synchronization and saving changes to the database.
  */
 fun Application.configureSockets() {
     install(WebSockets) {
