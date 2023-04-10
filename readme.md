@@ -43,6 +43,17 @@ Example: `docker push jwang1000/whiteboard-server:latest`
 The image should now be available to deploy as an Azure container.
 
 
+## Testing
+
+Both the client application and the server have their own unit tests.
+
+Each test can be run by itself or altogether through the `gradle test` task for 
+both `infra` and `application`.
+
+Make sure to run `gradle clean` before running any tests as well as in between tests.
+If you do not, errors are likely to occur.
+
+
 ## Images
 
 <a href="https://www.flaticon.com/free-icons/pen" title="pen icons">Pen icons created by Freepik - Flaticon</a>

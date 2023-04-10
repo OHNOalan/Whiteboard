@@ -28,9 +28,9 @@ class LineStylesTest {
         @JvmStatic
         fun initToolkit() {
             Thread {
-                Platform.startup{}
+                Platform.startup {}
                 latch.countDown()
-                Platform.runLater{}
+                Platform.runLater {}
             }.start()
             // wait for initialization to finish
             latch.await(1, TimeUnit.SECONDS)
