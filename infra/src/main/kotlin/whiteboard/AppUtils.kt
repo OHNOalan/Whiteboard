@@ -12,14 +12,21 @@ object AppUtils {
             .fold("") { str, it -> str + "%02x".format(it) }
     }
 
-    fun getSecret(): String {
-        return "1278489we7f6sd4f8x4e"
+    fun getRandomString(length: Int): String {
+        val allowedChars = ('A'..'Z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars.random() }
+            .joinToString("")
     }
 
-    fun generateResponse(success: Boolean, message: String): String {
+    fun generateResponse(
+        success: Boolean,
+        message: String,
+        roomCode: String = ""
+    ): String {
         return Json.encodeToString(
             AppResponseSchema.serializer(),
-            AppResponseSchema(success, message)
+            AppResponseSchema(success, message, roomCode)
         )
     }
 }

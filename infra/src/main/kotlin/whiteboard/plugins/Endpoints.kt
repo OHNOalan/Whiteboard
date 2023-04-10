@@ -6,6 +6,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
 import whiteboard.AppUtils
+import whiteboard.models.RoomControl
 import whiteboard.models.UserControl
 
 
@@ -59,7 +60,8 @@ fun Application.configureEndpoints() {
                 call.respondText {
                     AppUtils.generateResponse(
                         true,
-                        user.token()
+                        user.token(),
+                        RoomControl.generateRoom()
                     )
                 }
             } else {
@@ -81,7 +83,8 @@ fun Application.configureEndpoints() {
                 call.respondText {
                     AppUtils.generateResponse(
                         true,
-                        user.token()
+                        user.token(),
+                        RoomControl.generateRoom()
                     )
                 }
             } else {
@@ -101,14 +104,45 @@ fun Application.configureEndpoints() {
                 call.respondText {
                     AppUtils.generateResponse(
                         true,
-                        user.username
+                        user.username,
+                        RoomControl.generateRoom()
                     )
                 }
             } else {
                 call.respondText {
                     AppUtils.generateResponse(
                         false,
-                        ""
+                        "Autologin failed because token is invalid."
+                    )
+                }
+            }
+        }
+        post("/room/update") {
+            val formParameters = call.receiveParameters()
+            val roomCode = formParameters.getOrFail<String>("roomCode")
+            if (roomCode.isEmpty()) {
+                call.respondText {
+                    AppUtils.generateResponse(
+                        true,
+                        "",
+                        RoomControl.generateRoom()
+                    )
+                }
+                return@post
+            }
+            if (RoomControl.getRoomId(roomCode) != null) {
+                call.respondText {
+                    AppUtils.generateResponse(
+                        true,
+                        "",
+                        roomCode
+                    )
+                }
+            } else {
+                call.respondText {
+                    AppUtils.generateResponse(
+                        false,
+                        "Invalid room code."
                     )
                 }
             }

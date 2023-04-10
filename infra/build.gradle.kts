@@ -7,8 +7,8 @@ plugins {
 group = "whiteboard"
 version = "0.0.1"
 
-val exposed_version = "0.41.1"
-val h2_version = "2.1.214"
+val exposedVersion = "0.41.1"
+val h2Version = "2.1.214"
 
 application {
     //mainModule.set("infra")
@@ -30,10 +30,10 @@ dependencies {
     implementation("io.ktor:ktor-server-websockets-jvm:2.2.4")
     implementation("io.ktor:ktor-server-netty-jvm:2.2.4")
     implementation("ch.qos.logback:logback-classic:1.4.6")
-    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
-    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
-    implementation("com.h2database:h2:$h2_version")
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("com.h2database:h2:$h2Version")
     testImplementation("io.ktor:ktor-server-tests-jvm:2.2.4")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.8.10")
 }

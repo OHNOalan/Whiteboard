@@ -61,10 +61,17 @@ data class AppEntitySchema(
 
 @Serializable
 data class AppEntitiesSchema(
-    val entities: List<AppEntitySchema>, val operation: Int, val undoState: Int
+    val entities: List<AppEntitySchema>,
+    val operation: Int,
+    val undoState: Int,
+    val roomCode: String = ""
 )
 
 @Serializable
-data class AppResponseSchema(val success: Boolean, val message: String)
+data class AppResponseSchema(
+    val success: Boolean,
+    val message: String,
+    val roomCode: String
+)
 
 data class NodeData(val type: String, val id: String, val timestamp: Long)
