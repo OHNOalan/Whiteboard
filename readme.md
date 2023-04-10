@@ -45,6 +45,8 @@ All undo and redo items are stored globally on a per room basis. That means anyo
 
 If you wish to connect to the deployed server instead of using the local server, you can change the hostname in `AppSettings.kt` file under the `application` project.
 
+It is important to run `gradle clean` on the `application` project in between shutting down the app and starting it again. Not doing so may cause the app to crash.
+
 This concludes a brief overview of using the whiteboard. Please see features section for detailed list of features.
 
 
