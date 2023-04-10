@@ -27,10 +27,6 @@ import java.util.prefs.Preferences
  * @property stageReference A reference to the stage of the entire whiteboard app.
  */
 class AppLayout(private val stageReference: Stage) {
-    // Set url and port of the server here
-    private val host: String = "whiteboard.fpcmfydsbsf5ftdb.eastus.azurecontainer.io"
-    private val port: Int = 8080
-
     private var username: String = ""
     private var whiteboard: BorderPane = BorderPane()
     private val loginPage: GridPane
@@ -41,7 +37,7 @@ class AppLayout(private val stageReference: Stage) {
     init {
         stageReference.scene = sceneReference
 
-        loginPage = AppLoginPage(this, host, port)
+        loginPage = AppLoginPage(this)
         // if there's no token load login page
         val token = Preferences.userRoot().get("token", "Token")
         if (token == "Token") {
@@ -64,9 +60,9 @@ class AppLayout(private val stageReference: Stage) {
         val webSocketThread = GlobalScope.launch {
             runBlocking {
                 client.webSocket(method = HttpMethod.Get,
-                    host = host,
+                    host = AppSettings.HOST,
                     path = "/sync",
-                    port = port,
+                    port = AppSettings.PORT,
                     request = {
                         // Set WebSocket headers or options if needed
                     })

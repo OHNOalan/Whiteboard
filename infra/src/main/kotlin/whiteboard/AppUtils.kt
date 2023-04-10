@@ -19,10 +19,6 @@ object AppUtils {
             .joinToString("")
     }
 
-    fun getSecret(): String {
-        return "1278489we7f6sd4f8x4e"
-    }
-
     fun generateResponse(
         success: Boolean,
         message: String,

@@ -18,16 +18,10 @@ import java.util.prefs.Preferences
  * Creates the login page for the whiteboard app.
  *
  * @property layoutReference Reference to the layout object for the app.
- * @property host The url (without http://) of the whiteboard server.
- * @property port The port that the whiteboard server accepts websocket connections on.
  */
 class AppLoginPage(
     private val layoutReference: AppLayout,
-    private val host: String,
-    private val port: Int
 ) : GridPane() {
-    private val charset = "UTF-8"
-
     init {
         this.alignment = Pos.CENTER
         this.hgap = 10.0
@@ -50,9 +44,10 @@ class AppLoginPage(
         if (token != "Token") {
             try {
                 val response = AppUtils.httpRequest(
-                    "/user/autologin", String.format(
+                    "/user/autologin",
+                    String.format(
                         "token=%s",
-                        URLEncoder.encode(token, charset)
+                        URLEncoder.encode(token, AppSettings.CHARSET)
                     )
                 )
 
@@ -98,8 +93,8 @@ class AppLoginPage(
             val password = passwordBox.text
             val urlParams = String.format(
                 "username=%s&password=%s",
-                URLEncoder.encode(username, charset),
-                URLEncoder.encode(password, charset)
+                URLEncoder.encode(username, AppSettings.CHARSET),
+                URLEncoder.encode(password, AppSettings.CHARSET)
             )
             try {
                 val response = AppUtils.httpRequest(urlRoute, urlParams)
@@ -133,8 +128,8 @@ class AppLoginPage(
             val password = passwordBox.text
             val urlParams = String.format(
                 "username=%s&password=%s",
-                URLEncoder.encode(username, charset),
-                URLEncoder.encode(password, charset)
+                URLEncoder.encode(username, AppSettings.CHARSET),
+                URLEncoder.encode(password, AppSettings.CHARSET)
             )
             try {
                 val response = AppUtils.httpRequest(urlRoute, urlParams)

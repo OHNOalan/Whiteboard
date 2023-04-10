@@ -32,20 +32,26 @@ object AppUtils {
         return separator
     }
 
+    /**
+     * Creates and sends an HTTP request to the server to log in/register account.
+     *
+     * @param urlRoute The route of the login page (following the host url).
+     * @param urlParams The arguments of the HTTP request (username and password).
+     */
     fun httpRequest(
         urlRoute: String,
-        urlParams: String
+        urlParams: String,
     ): AppResponseSchema {
-        val urlHost = "http://127.0.0.1:8080"
+        val urlHost = "http://${AppSettings.HOST}:${AppSettings.PORT}"
         val urlText = "$urlHost$urlRoute?$urlParams"
         val url = URL(urlText)
 
         val httpURLConnection: URLConnection = url.openConnection()
         httpURLConnection.doOutput = true // triggers POST
-        httpURLConnection.setRequestProperty("Accept-Charset", "UTF-8")
+        httpURLConnection.setRequestProperty("Accept-Charset", AppSettings.CHARSET)
         httpURLConnection.setRequestProperty(
             "Content-Type",
-            "application/x-www-form-urlencoded;charset=UTF-8"
+            "application/x-www-form-urlencoded;charset=${AppSettings.CHARSET}"
         )
 
         try {
@@ -55,7 +61,7 @@ object AppUtils {
             BufferedReader(
                 InputStreamReader(
                     httpURLConnection.getInputStream(),
-                    "UTF-8"
+                    AppSettings.CHARSET
                 )
             ).use { reader ->
                 response = Json.decodeFromString(

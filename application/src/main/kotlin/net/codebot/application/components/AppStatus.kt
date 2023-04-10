@@ -84,7 +84,7 @@ class AppStatus(sideBar: VBox, appLayout: AppLayout, appCanvas: AppCanvas) {
         val urlRoute = "/room/update"
         val urlParams = String.format(
             "roomCode=%s",
-            URLEncoder.encode(roomCode, "UTF-8"),
+            URLEncoder.encode(roomCode, AppSettings.CHARSET),
         )
         try {
             val response = AppUtils.httpRequest(urlRoute, urlParams)

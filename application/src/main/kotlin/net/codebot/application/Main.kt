@@ -14,7 +14,7 @@ class Main : Application() {
         stage.minWidth = 640.0
         stage.maxHeight = 1200.0
         stage.maxWidth = 1600.0
-        stage.icons.add(Image("file:src/main/assets/cursors/app.png"));
+        stage.icons.add(Image("file:src/main/assets/cursors/app.png"))
 
         val appLayout = AppLayout(stage)
         AppData.registerAppLayout(appLayout)
