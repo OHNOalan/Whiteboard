@@ -22,6 +22,7 @@ data class AppResponseSchema(
 
 class ClientConnection(val session: DefaultWebSocketSession) {
     private var roomId: Int = -1
+
     fun setRoomId(id: Int) {
         roomId = id
     }
