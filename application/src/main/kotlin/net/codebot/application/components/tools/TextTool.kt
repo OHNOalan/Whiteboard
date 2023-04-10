@@ -41,6 +41,7 @@ class TextTool(container: HBox, styleBar: AppStylebar) : BaseTool(
         rectangle.stroke = stroke
         rectangle.strokeWidth = 1.0
         rectangle.isPickOnBounds = false
+        rectangle.fill = null
         initX = x
         initY = y
         rectangle.translateX = x
