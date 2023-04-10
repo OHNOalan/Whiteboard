@@ -15,3 +15,5 @@ A whiteboard application.
 <a href="https://www.flaticon.com/free-icons/text" title="text icons">Text icons created by Freepik - Flaticon</a>
 
 <a href="https://www.flaticon.com/free-icons/selection" title="selection icons">Selection icons created by Pixel perfect - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/whiteboard" title="whiteboard icons">Whiteboard icons created by Smashicons - Flaticon</a>
