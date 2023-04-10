@@ -31,7 +31,7 @@ class AppLayout(private val stageReference: Stage) {
     private var whiteboard: BorderPane = BorderPane()
     private val loginPage: GridPane
     private val sceneReference: Scene = Scene(Pane(), 640.0, 480.0)
-    private val appCanvas: AppCanvas = AppCanvas(whiteboard)
+    private lateinit var appCanvas: AppCanvas
     private lateinit var webSocketSession: WebSocketSession
 
     init {
@@ -109,7 +109,9 @@ class AppLayout(private val stageReference: Stage) {
             SceneIndex.WHITEBOARD -> {
                 stageReference.width = 1100.0
                 stageReference.height = 800.0
-
+                stageReference.minWidth = 1000.0
+                stageReference.minHeight = 800.0
+                appCanvas = AppCanvas(whiteboard)
                 AppSidebar(whiteboard, appCanvas, this)
                 AppTopbar(whiteboard, appCanvas)
                 sceneReference.root = whiteboard
@@ -119,6 +121,8 @@ class AppLayout(private val stageReference: Stage) {
             SceneIndex.LOGIN_PAGE -> {
                 stageReference.width = 640.0
                 stageReference.height = 480.0
+                stageReference.minWidth = 500.0
+                stageReference.minHeight = 300.0
                 sceneReference.root = loginPage
                 centerStage()
             }
