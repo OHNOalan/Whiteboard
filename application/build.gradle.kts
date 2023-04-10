@@ -25,7 +25,8 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.2.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("org.slf4j:slf4j-simple:1.6.1")
-    testImplementation(kotlin("test"))
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
 }
 
 tasks.test {
