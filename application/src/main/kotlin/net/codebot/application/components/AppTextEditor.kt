@@ -4,6 +4,11 @@ import javafx.beans.value.ChangeListener
 import javafx.scene.web.HTMLEditor
 import kotlinx.serialization.json.Json
 
+/**
+ * Contains all the logic necessary for the text editor
+ * Include extra functionality to be able to hide
+ * the toolbar and scrollbar when the editor loses focus.
+ */
 class AppTextEditor : HTMLEditor() {
     var previousTranslateX: Double? = null
     var previousTranslateY: Double? = null

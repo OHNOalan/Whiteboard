@@ -1,5 +1,8 @@
 package net.codebot.application.components
 
+/**
+ * Index object to organize all different types of entities
+ */
 object EntityIndex {
     const val LINE = "LINE"
     const val RECTANGLE = "RECTANGLE"

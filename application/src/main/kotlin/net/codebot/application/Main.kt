@@ -6,6 +6,11 @@ import javafx.stage.Stage
 import net.codebot.application.components.AppData
 import net.codebot.application.components.AppLayout
 
+/**
+ * Initializes the main entry point for the application
+ *
+ * Includes dimensions, title, icons, and registering layout
+ */
 class Main : Application() {
     override fun start(stage: Stage) {
         stage.isResizable = true

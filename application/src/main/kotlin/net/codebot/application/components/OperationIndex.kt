@@ -1,5 +1,8 @@
 package net.codebot.application.components
 
+/**
+ * Index object to organize all different types of operations used
+ */
 object OperationIndex {
     const val ADD = 1
     const val DELETE = 2

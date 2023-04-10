@@ -5,6 +5,13 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import net.codebot.application.components.tools.*
 
+/**
+ * Initiates the toolbar which is used to manage all tools within the app
+ *
+ * @param sideBar The sidebar to add this status component to.
+ * @param canvas The main canvas of the whiteboard.
+ * @param styleBar The style bar used to set the style for various tools.
+ */
 class AppToolbar(sideBar: VBox, canvas: AppCanvas, styleBar: AppStylebar) {
     init {
         val lineOne = HBox()

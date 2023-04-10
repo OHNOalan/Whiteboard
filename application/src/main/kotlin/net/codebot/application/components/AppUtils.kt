@@ -12,20 +12,34 @@ import java.io.InputStreamReader
 import java.net.URL
 import java.net.URLConnection
 
-
+/**
+ * Utility class with functions for spacing, separations, and http requests
+ */
 object AppUtils {
+    /**
+     * Creates a horizontal spacer as a region which takes priority in growth space.
+     * @return Horizontal spacer.
+     */
     fun createHSpacer(): Region {
         val spacer = Region()
         HBox.setHgrow(spacer, Priority.ALWAYS)
         return spacer
     }
 
+    /**
+     * Creates a vertical spacer as a region which takes priority in growth space.
+     * @return Vertical spacer.
+     */
     fun createVSpacer(): Region {
         val spacer = Region()
         VBox.setVgrow(spacer, Priority.ALWAYS)
         return spacer
     }
 
+    /**
+     * Creates a separator aligned in the center horizontally
+     * @return Separator.
+     */
     fun createSeparator(): Separator {
         val separator = Separator()
         separator.halignment = HPos.CENTER
