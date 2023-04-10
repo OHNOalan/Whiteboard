@@ -196,11 +196,13 @@ class AppCanvas(borderPane: BorderPane) : Pane() {
         tools.add(tool)
     }
 
-    fun clearCanvas() {
+    fun clearCanvas(broadcast: Boolean = true) {
         if (drawnItems.values.isNotEmpty()) {
             this.children.removeAll(drawnItems.values.toSet())
             deselectItemIfSelected()
-            AppData.broadcastDelete(drawnItems.values.toList())
+            if (broadcast) {
+                AppData.broadcastDelete(drawnItems.values.toList())
+            }
             drawnItems.clear()
         }
     }

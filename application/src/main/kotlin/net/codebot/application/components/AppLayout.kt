@@ -57,6 +57,7 @@ class AppLayout(stage: Stage) {
                 ) {
                     webSocketSession = this
                     AppData.registerSocket(this)
+                    AppData.broadcastJoin()
                     // Called when a message is received from the WebSocket
                     for (frame in incoming) {
                         val update = (frame as Frame.Text).readText()

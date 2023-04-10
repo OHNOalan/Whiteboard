@@ -13,6 +13,7 @@ object AppData {
     private var counter = 0
     private lateinit var socket: DefaultWebSocketSession
     private lateinit var appLayout: AppLayout
+    lateinit var roomCode: String
 
     // Serializes a list of nodes into a string format
     // Use for saving canvas entities to a local file
@@ -135,9 +136,14 @@ object AppData {
         broadcast(listOf(), OperationIndex.REDO)
     }
 
+    fun broadcastJoin() {
+        broadcast(listOf(), OperationIndex.JOIN, roomCode)
+    }
+
     fun generateNodeId(): String {
-        val id = appLayout.getUsername() + "/" + System.currentTimeMillis()
-            .toString() + "-" + counter.toString()
+        val id =
+            appLayout.getUsername() + "/" + roomCode + "/" + System.currentTimeMillis()
+                .toString() + "-" + counter.toString()
         counter += 1
         return id
     }
@@ -154,7 +160,7 @@ object AppData {
         val nodeData = node.userData as NodeData
         return AppEntitySchema(
             nodeData.id,
-            123,
+            0,
             serializeSingle(node),
             null,
             nodeData.type,
@@ -172,10 +178,14 @@ object AppData {
         return entities
     }
 
-    private fun broadcast(entities: List<AppEntitySchema>, operation: Int) {
+    private fun broadcast(
+        entities: List<AppEntitySchema>,
+        operation: Int,
+        roomCode: String = ""
+    ) {
         val data = Json.encodeToString(
             AppEntitiesSchema.serializer(),
-            AppEntitiesSchema(entities, operation, UndoIndex.NONE)
+            AppEntitiesSchema(entities, operation, UndoIndex.NONE, roomCode)
         )
         when (operation) {
             OperationIndex.ADD -> {
@@ -188,6 +198,10 @@ object AppData {
 
             OperationIndex.MODIFY -> {
                 println("Modify:")
+            }
+
+            OperationIndex.JOIN -> {
+                println("Join:")
             }
         }
         println(data)

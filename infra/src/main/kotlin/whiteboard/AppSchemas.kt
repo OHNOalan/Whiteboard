@@ -9,13 +9,30 @@ import java.util.*
 data class AppEntitiesSchema(
     val entities: List<Entity>,
     val operation: Int,
-    var undoState: Int
+    var undoState: Int,
+    val roomCode: String = "",
 )
 
 @Serializable
-data class AppResponseSchema(val success: Boolean, val message: String)
+data class AppResponseSchema(
+    val success: Boolean,
+    val message: String,
+    val roomCode: String
+)
 
-class ClientConnection(val session: DefaultWebSocketSession, val roomId: Int)
+class ClientConnection(val session: DefaultWebSocketSession) {
+    private var roomId: Int = -1
+    fun setRoomId(id: Int) {
+        roomId = id
+    }
+
+    fun getRoomId(): Int {
+        if (roomId < 0) {
+            println("Client connection did not initialize room.")
+        }
+        return roomId
+    }
+}
 
 class UndoRedoStack {
     private val undoStack =
