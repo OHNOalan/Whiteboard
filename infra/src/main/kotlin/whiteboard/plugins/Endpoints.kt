@@ -9,12 +9,21 @@ import whiteboard.AppUtils
 import whiteboard.models.RoomControl
 import whiteboard.models.UserControl
 
-
+/**
+ * Endpoints for handling user and room requests.
+ */
 fun Application.configureEndpoints() {
     routing {
+        /**
+         * The default endpoint that signals that the server is online.
+         */
         get("/") {
             call.respondText { AppUtils.generateResponse(true, "Server online!") }
         }
+        /**
+         * Endpoint for creating a user account. Takes username and password and returns
+         * the user token and room code if registration is successful.
+         */
         post("/user/create") {
             val formParameters = call.receiveParameters()
             val username = formParameters.getOrFail<String>("username")
@@ -73,6 +82,10 @@ fun Application.configureEndpoints() {
                 }
             }
         }
+        /**
+         * Endpoint for logging a user in. Takes a username and password. Will return the
+         * token for the user and the room code if log in is successful.
+         */
         post("/user/login") {
             val formParameters = call.receiveParameters()
             val user = UserControl.login(
@@ -96,6 +109,10 @@ fun Application.configureEndpoints() {
                 }
             }
         }
+        /**
+         * Endpoint for logging a user in via a saved user token. Takes the user token
+         * and returns the username for the user and the room code on success.
+         */
         post("/user/autologin") {
             val formParameters = call.receiveParameters()
             val user =
@@ -117,6 +134,10 @@ fun Application.configureEndpoints() {
                 }
             }
         }
+        /**
+         * Validates a given room code or create a new room. Will return the room code on
+         * success.
+         */
         post("/room/update") {
             val formParameters = call.receiveParameters()
             val roomCode = formParameters.getOrFail<String>("roomCode")

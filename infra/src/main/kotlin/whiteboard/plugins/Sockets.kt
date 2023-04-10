@@ -11,7 +11,14 @@ import whiteboard.models.RoomControl
 import java.time.Duration
 import java.util.*
 
-
+/**
+ * Process a list of entities and serialize those entities to the database.
+ * @param receivedMessage The serialized information of entities list.
+ * @param operation The type of operation for entities.
+ * @param roomId The roomId that the transaction will operate on.
+ * @param usePreviousDescriptor Only used for a modify action. Used for undo/redo
+ * to track the previous state of the item.
+ */
 suspend fun processMessage(
     receivedMessage: AppEntitiesSchema,
     operation: Int,
@@ -54,6 +61,10 @@ suspend fun processMessage(
     }
 }
 
+
+/**
+ * The endpoint for handling real-time synchronization and saving changes to the database.
+ */
 fun Application.configureSockets() {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
