@@ -8,7 +8,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 
-
+/**
+ * Contains the main data for socket connections, serialization functions
+ * room code, and app layout
+ */
 object AppData {
     private var counter = 0
     private lateinit var socket: DefaultWebSocketSession

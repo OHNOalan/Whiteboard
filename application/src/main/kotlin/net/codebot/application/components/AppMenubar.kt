@@ -11,6 +11,11 @@ import net.codebot.application.components.menuItems.viewMenu.ResetZoomMenuItem
 import net.codebot.application.components.menuItems.viewMenu.ZoomInMenuItem
 import net.codebot.application.components.menuItems.viewMenu.ZoomOutMenuItem
 
+/**
+ * Initializes menu dropdowns with their respective items on the top bar of the application
+ * @param topBar A reference to the stage of the entire whiteboard app.
+ * @param canvas The main canvas of the whiteboard.
+ */
 class AppMenubar(topBar: VBox, canvas: AppCanvas) {
     init {
         val menuBar = MenuBar()
