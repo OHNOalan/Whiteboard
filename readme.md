@@ -39,6 +39,8 @@ You can undo and redo changes to the whiteboard under the edit dropdown menu.
 
 All undo and redo items are stored globally on a per room basis. That means anyone in the same room can undo and redo entities in that room.
 
+If you wish to connect to the deployed server instead of using the local server, you can change the hostname in `AppSettings.kt` file under the `application` project.
+
 This concludes a brief overview of using the whiteboard. Please see features section for detailed list of features.
 
 
