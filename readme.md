@@ -111,6 +111,9 @@ All drawing items on the canvas are synchronized in realtime between all users i
 
 To deploy the whiteboard server to Azure, we need to create a Docker image.
 
+The Docker image copies files from the build folder, so be sure to run the 
+`gradle build` task for the `infra` project first.
+
 Change to the infra folder: `cd infra`
 
 Then build the image: `docker build -t <name of image>`
@@ -133,6 +136,17 @@ Then push to Docker Hub: `docker push <tagged name>:latest`
 Example: `docker push jwang1000/whiteboard-server:latest`
 
 The image should now be available to deploy as an Azure container.
+
+
+## Testing
+
+Both the client application and the server have their own unit tests.
+
+Each test can be run by itself or altogether through the `gradle test` task for 
+both `infra` and `application`.
+
+Make sure to run `gradle clean` before running any tests as well as in between tests.
+If you do not, errors are likely to occur.
 
 
 ## Images
