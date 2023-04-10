@@ -1,11 +1,5 @@
-Single Desktop Application
-(c) 2022 Jeff Avery
-
-Demonstrates how to structure a multi-project build in Gradle.
-It includes a main JavaFX project in the application/ folder,
-a console application in console/, and a shared library 
-in the shared/ folder which extracts system information (like
-the name of the current user). 
+# Whiteboard
+A whiteboard application supporting multiple users editing the same content in various rooms.
 
 Supported gradle tasks:
 
@@ -45,3 +39,22 @@ Example: `docker push jwang1000/whiteboard-server:latest`
 
 The image should now be available to deploy as an Azure container.
 
+
+## Images
+
+<a href="https://www.flaticon.com/free-icons/pen" title="pen icons">Pen icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/logout" title="logout icons">Logout icons created by Pixel perfect - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/line" title="line icons">Line icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/eraser" title="eraser icons">Eraser icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/shapes" title="shapes icons">Shapes icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/text" title="text icons">Text icons created by Freepik - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/selection" title="selection icons">Selection icons created by Pixel perfect - Flaticon</a>
+
+<a href="https://www.flaticon.com/free-icons/whiteboard" title="whiteboard icons">Whiteboard icons created by Smashicons - Flaticon</a>
+>>>>>>> readme.md

@@ -36,6 +36,7 @@ class AppLayout(private val stageReference: Stage) {
     private val loginPage: GridPane
     private val sceneReference: Scene = Scene(Pane(), 640.0, 480.0)
     private val appCanvas: AppCanvas = AppCanvas(whiteboard)
+    private lateinit var webSocketSession: WebSocketSession
 
     init {
         stageReference.scene = sceneReference
@@ -68,7 +69,9 @@ class AppLayout(private val stageReference: Stage) {
                     port = port,
                     request = {
                         // Set WebSocket headers or options if needed
-                    }) {
+                    })
+                {
+                    webSocketSession = this
                     AppData.registerSocket(this)
                     // Called when a message is received from the WebSocket
                     for (frame in incoming) {
@@ -88,6 +91,15 @@ class AppLayout(private val stageReference: Stage) {
                 webSocketThread.cancel()
             }
         })
+    }
+
+    /**
+     * Closes the websocket connection to the server.
+     */
+    private fun closeSocketConnection() {
+        GlobalScope.launch {
+            webSocketSession.close()
+        }
     }
 
     /**
@@ -126,6 +138,9 @@ class AppLayout(private val stageReference: Stage) {
 
         if (user.isEmpty()) {
             setScene(SceneIndex.LOGIN_PAGE)
+
+            // Close socket connection when user logs out
+            closeSocketConnection()
         } else {
             setScene(SceneIndex.WHITEBOARD)
 
