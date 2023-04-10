@@ -10,7 +10,7 @@ import whiteboard.models.RoomControl
 import whiteboard.models.UserControl
 
 /**
- * Endpoints for handling user and room requests
+ * Endpoints for handling user and room requests.
  */
 fun Application.configureEndpoints() {
     routing {
