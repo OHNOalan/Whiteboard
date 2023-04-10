@@ -23,6 +23,8 @@ To run the project, start up the `infra` project first. This is the server of th
 
 After the server has started, run the whiteboard application to open one instance. You may run multiple instances at a time.
 
+If you have an issue with running the whiteboard application, run `gradle clean` first.
+
 The first screen you will see is the login screen. Create a username and password and click on register to create an account.
 
 After successfully logging in, you will see the whiteboard pop up. By default, you will be in a new room.
@@ -33,7 +35,7 @@ The room code at the top left shows the code of the room that you are currently 
 
 You may join a new room by typing in a valid room code and click join, or you can create a new room via the new room button.
 
-You can logout on the top left and sign in as a different user if you wish.
+You can log out on the top left and sign in as a different user if you wish.
 
 Changes are automatically saved in the cloud. As long as you remember your room number, every time you join that room, your drawings would be loaded.
 
@@ -41,7 +43,7 @@ You may also save drawings locally as a whiteboard file with the dropdown menu u
 
 You can undo and redo changes to the whiteboard under the edit dropdown menu.
 
-All undo and redo items are stored globally on a per room basis. That means anyone in the same room can undo and redo entities in that room.
+All undo and redo items are stored globally on a per-room basis. That means anyone in the same room can undo and redo entities in that room.
 
 If you wish to connect to the deployed server instead of using the local server, you can change the hostname in `AppSettings.kt` file under the `application` project.
 
@@ -64,9 +66,9 @@ File > Export to Image: Export the current drawing as a PNG image file.
 
 File > Exit: Exits the application.
 
-Edit > Undo: If there are undo-able actions, undo the top action globally for all users in the room. Otherwise it does nothing. This supports undoing created drawings, deleted drawings, text box changes, shape changes, segment line changes, entity movements, clear screens, and load files.
+Edit > Undo: If there are undo-able actions, undo the top action globally for all users in the room. Otherwise, it does nothing. This supports undoing created drawings, deleted drawings, text box changes, shape changes, segment line changes, entity movements, clear screens, and load files.
 
-Edit > Redo: If there are redo-able actions, redo the top action globally for all users in the room. Otherwise it does nothing. This supports redoing created drawings, deleted drawings, text box changes, shape changes, segment line changes, entity movements, clear screens, and load files.
+Edit > Redo: If there are redo-able actions, redo the top action globally for all users in the room. Otherwise, it does nothing. This supports redoing created drawings, deleted drawings, text box changes, shape changes, segment line changes, entity movements, clear screens, and load files.
 
 Edit > Clear: Clears all the drawings off the canvas.
 
@@ -94,15 +96,15 @@ Select: Edits text box and selects items on the canvas to move it around. To edi
 
 Registration: You can create an account on the login screen with a username and password.
 
-Login: You can login to your existing account on the login screen with a username and password.
+Login: You can log in to your existing account on the login screen with a username and password.
 
 Remember Me: You can keep your account logged in by checking the remember me checkbox. This will store a cryptographically signed token on your computer that can sign you back in next time without the need of credentials.
 
-Logout: You can logout of the current account.
+Logout: You can log out of the current account.
 
 ### Rooms
 
-Each room is identified by a room code. You can view your room code on the top left. You can join a room by replacing the room code input with a valid target code. By joining a room, you will clear your existing canvas, and load up whatever items on the canvas the joined room has. You may also create a new room. By doing so, your canvas will be cleared and you will be granted a blank canvas. Rooms are kept indefinitely, and you can rejoin old rooms. This allows a user to load multiple different whiteboards from the cloud if they remember the room codes.
+Each room is identified by a room code. You can view your room code on the top left. You can join a room by replacing the room code input with a valid target code. By joining a room, you will clear your existing canvas, and load up whatever items on the canvas the joined room has. You may also create a new room. By doing so, your canvas will be cleared, and you will be granted a blank canvas. Rooms are kept indefinitely, and you can rejoin old rooms. This allows a user to load multiple different whiteboards from the cloud if they remember the room codes.
 
 ### Synchronization
 
