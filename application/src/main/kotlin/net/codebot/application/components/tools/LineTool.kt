@@ -11,6 +11,12 @@ import net.codebot.application.components.EntityIndex
 import net.codebot.application.components.NodeData
 import net.codebot.application.components.tools.styles.LineStyles
 
+/**
+ * The set of properties for the line tool.
+ * @param container The container to add the tool to.
+ * @param styleBar The style bar for this tool where all customization options are
+ * displayed.
+ */
 class LineTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/line.png",

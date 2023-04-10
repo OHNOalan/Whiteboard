@@ -6,6 +6,14 @@ import javafx.scene.text.Font
 import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.AppUtils
 
+/**
+ * Creates the styles for the text tool.
+ *
+ * Note that the text tool has no "styles" per se, since all the formatting is attached
+ * to the text box itself. There is only a label as a descriptor.
+ *
+ * @param styleBar The style bar to add the styles to.
+ */
 class TextStyles(styleBar: AppStylebar) : BaseStyles(styleBar) {
     init {
         val container = HBox()

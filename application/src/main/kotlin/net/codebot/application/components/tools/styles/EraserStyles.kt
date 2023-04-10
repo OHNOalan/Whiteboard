@@ -9,6 +9,11 @@ import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.EraserTool
 import kotlin.math.roundToInt
 
+/**
+ * Creates the styles for the eraser tool.
+ * @param styleBar The style bar to add the styles to.
+ * @param eraserTool A reference to the eraser tool.
+ */
 class EraserStyles(styleBar: AppStylebar, eraserTool: EraserTool) :
     BaseStyles(styleBar) {
     init {

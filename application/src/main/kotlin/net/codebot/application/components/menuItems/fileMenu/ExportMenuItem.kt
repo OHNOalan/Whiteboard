@@ -8,6 +8,11 @@ import javafx.stage.FileChooser
 import net.codebot.application.components.AppCanvas
 import net.codebot.application.components.menuItems.BaseMenuItem
 
+/**
+ * Creates the menu item to export the canvas as an image. Shortcut: CTRL+E
+ * @param menu The menu to add this item to.
+ * @param canvas The main canvas of the whiteboard.
+ */
 class ExportMenuItem(menu: Menu, canvas: AppCanvas) :
     BaseMenuItem(
         menu,
@@ -18,6 +23,9 @@ class ExportMenuItem(menu: Menu, canvas: AppCanvas) :
     private var canvasReference: AppCanvas = canvas
     private var exportPath: String? = null
 
+    /**
+     * Export the entire whiteboard as an image when the menu item is clicked.
+     */
     override fun onItemClicked() {
         if (exportPath == null) {
             val fileChooser = FileChooser()

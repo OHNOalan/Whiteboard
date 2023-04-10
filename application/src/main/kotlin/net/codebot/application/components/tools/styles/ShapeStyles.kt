@@ -12,7 +12,11 @@ import net.codebot.application.components.AppStylebar
 import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.ShapeTool
 
-
+/**
+ * Creates the styles for the shape tool.
+ * @param styleBar The style bar to add the styles to.
+ * @param shapeTool A reference to the shape tool.
+ */
 class ShapeStyles(styleBar: AppStylebar, shapeTool: ShapeTool) : BaseStyles(styleBar) {
     init {
         val colorPickerContainer = HBox()

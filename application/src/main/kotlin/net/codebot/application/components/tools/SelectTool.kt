@@ -14,6 +14,12 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * The set of properties for the selection tool.
+ * @param container The container to add the tool to.
+ * @param styleBar The style bar for this tool where all customization options are
+ * displayed.
+ */
 class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     container,
     "file:src/main/assets/cursors/selection.png",
@@ -61,12 +67,18 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
     val onCreateShape: (Double, Double) -> Unit =
         { x, y ->
             selectionRectangle =
-                onCreateRectangle(x, y, selectionLineColor, strokeWidth = 1.0)
+                createBoundingRectangle(x, y, selectionLineColor, strokeWidth = 1.0)
         }
-    val onResizeShape: (Double, Double) -> Unit =
-        { x, y -> onResizeRectangle(selectionRectangle, x, y) }
 
-    private fun onCreateRectangle(
+    val onResizeShape: (Double, Double) -> Unit =
+        { x, y -> resizeBoundingRectangle(selectionRectangle, x, y) }
+
+    /**
+     * Creates a bounding rectangle to use while the mouse is being dragged.
+     * Shows the area that objects are being selected in.
+     * @return A rectangle object to display while the mouse is being dragged.
+     */
+    private fun createBoundingRectangle(
         x: Double,
         y: Double,
         stroke: Color,
@@ -86,7 +98,11 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
         return rectangle
     }
 
-    private fun onResizeRectangle(rectangle: Rectangle, x: Double, y: Double) {
+    /**
+     * Changes the size of the bounding rectangle while the mouse is being dragged.
+     * @see createBoundingRectangle
+     */
+    private fun resizeBoundingRectangle(rectangle: Rectangle, x: Double, y: Double) {
         if (x < startX) {
             rectangle.translateX = x
             rectangle.width = startX - x
@@ -103,6 +119,9 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
         }
     }
 
+    /**
+     * Detects if the mouse click is within the area that is selected.
+     */
     private fun isClickInSelectionBox(x: Double, y: Double): Boolean {
         val bounds = selectedRectangle.boundsInParent
 
@@ -110,8 +129,15 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
                 (y >= bounds.minY && y <= bounds.maxY)
     }
 
-    // Safe to call even if nothing is selected
-    // May be called by the AppCanvas on undo/redo
+    /**
+     * Deselects any selected items.
+     *
+     * This function may be used in case other actions are occurring outside the
+     * selection tool that might cause the selected items to change, such as undo/redo
+     * and clearing the canvas in the `AppCanvas` class.
+     *
+     * This function is safe to call even if nothing is selected.
+     */
     fun deselect() {
         if (itemIsSelected) {
             canvasReference.children.remove(selectedRectangle)
@@ -241,64 +267,64 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
                     }
 
                     itemIsSelected = true
-                    selectedRectangle = onCreateRectangle(
+                    selectedRectangle = createBoundingRectangle(
                         minX - lineWidth / 2,
                         minY - lineWidth / 2,
                         selectedLineColor
                     )
-                    onResizeRectangle(
+                    resizeBoundingRectangle(
                         selectedRectangle,
                         maxX + lineWidth / 2,
                         maxY + lineWidth / 2
                     )
 
                     val topLeftCorner =
-                        onCreateRectangle(
+                        createBoundingRectangle(
                             minX - cornerRectangleSize / 2,
                             minY - cornerRectangleSize / 2,
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(
+                    resizeBoundingRectangle(
                         topLeftCorner,
                         minX + cornerRectangleSize / 2,
                         minY + cornerRectangleSize / 2
                     )
 
                     val topRightCorner =
-                        onCreateRectangle(
+                        createBoundingRectangle(
                             maxX - cornerRectangleSize / 2,
                             minY - cornerRectangleSize / 2,
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(
+                    resizeBoundingRectangle(
                         topRightCorner,
                         maxX + cornerRectangleSize / 2,
                         minY + cornerRectangleSize / 2
                     )
 
                     val bottomRightCorner =
-                        onCreateRectangle(
+                        createBoundingRectangle(
                             maxX - cornerRectangleSize / 2,
                             maxY - cornerRectangleSize / 2,
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(
+                    resizeBoundingRectangle(
                         bottomRightCorner,
                         maxX + cornerRectangleSize / 2,
                         maxY + cornerRectangleSize / 2
                     )
 
                     val bottomLeftCorner =
-                        onCreateRectangle(
+                        createBoundingRectangle(
                             minX - cornerRectangleSize / 2,
                             maxY - cornerRectangleSize / 2,
                             cornerLineColor,
                             fill = cornerLineFill
                         )
-                    onResizeRectangle(
+                    resizeBoundingRectangle(
                         bottomLeftCorner,
                         minX + cornerRectangleSize / 2,
                         maxY + cornerRectangleSize / 2
@@ -321,7 +347,8 @@ class SelectTool(container: HBox, styleBar: AppStylebar) : BaseTool(
                     continue
                 }
                 if (node is AppTextEditor) {
-                    if (node.previousTranslateX == node.translateX && node.previousTranslateY == node.translateY) {
+                    if (node.previousTranslateX == node.translateX &&
+                        node.previousTranslateY == node.translateY) {
                         continue
                     }
                     node.previousTranslateX = node.translateX
