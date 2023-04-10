@@ -2,6 +2,10 @@
 
 A whiteboard application supporting multiple users editing the same content in various rooms.
 
+<img src="https://terrytm.com/files/whiteboard.PNG"/>
+
+By Terry Zheng, Jonathan Wang, Seth Hammell, and Alan Lee
+
 Supported gradle tasks:
 
 | Tasks   | Description                                          |
