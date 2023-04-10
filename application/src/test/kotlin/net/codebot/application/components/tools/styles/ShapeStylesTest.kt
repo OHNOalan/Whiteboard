@@ -1,90 +1,64 @@
 package net.codebot.application.components.tools.styles
 
-import javafx.event.EventHandler
-import javafx.scene.control.Button
-import javafx.scene.control.CheckBox
-import javafx.scene.control.ColorPicker
-import javafx.scene.control.Label
+import javafx.application.Platform
 import javafx.scene.layout.HBox
-import javafx.scene.paint.Color
-import javafx.scene.text.Font
+import javafx.stage.Stage
+import junit.framework.TestCase.*
 import net.codebot.application.components.AppStylebar
-import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.ShapeTool
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-/**
- * Creates the styles for the shape tool.
- * @param styleBar The style bar to add the styles to.
- * @param shapeTool A reference to the shape tool.
- */
-class ShapeStyles(styleBar: AppStylebar, shapeTool: ShapeTool) : BaseStyles(styleBar) {
-    init {
-        val colorPickerContainer = HBox()
-        val colorPicker = ColorPicker()
-        val colorPickerLabel = Label("Color:")
-        colorPicker.value = Color.valueOf("black")
-        colorPicker.setOnAction {
-            shapeTool.lineColor = colorPicker.value
-        }
-        colorPickerLabel.font = Font(18.0)
-        colorPickerContainer.children.addAll(
-            AppUtils.createHSpacer(),
-            colorPickerLabel,
-            AppUtils.createHSpacer(),
-            colorPicker,
-            AppUtils.createHSpacer()
-        )
-        controls.add(colorPickerContainer)
+class ShapeStylesTest {
+    private lateinit var stage: Stage
+    private lateinit var mockHBox: HBox
+    private lateinit var mockShapeTool: ShapeTool
+    private lateinit var mockStylebar: AppStylebar
+    private lateinit var shapeStyles: ShapeStyles
 
-        val fillContainer = HBox()
-        val fillCheckbox = CheckBox("Fill Shape")
-        fillCheckbox.setOnAction {
-            shapeTool.fillShape = fillCheckbox.isSelected
-        }
-        fillContainer.children.addAll(
-            AppUtils.createHSpacer(),
-            fillCheckbox,
-            AppUtils.createHSpacer(),
-        )
-        controls.add(fillContainer)
+    // We need to initialize the Toolkit once and only once.
+    companion object {
+        @JvmStatic
+        private val latch = CountDownLatch(1)
 
-        val buttonContainer = HBox()
-        val rectangleButton = Button("Rectangle")
-        rectangleButton.onMouseClicked = EventHandler {
-            shapeTool.onCreateShape = { x, y -> shapeTool.onCreateRectangle(x, y) }
-            shapeTool.onMoveShape = { x, y -> shapeTool.onMoveRectangle(x, y) }
-            shapeTool.onReleaseShape = { shapeTool.onReleaseRectangle() }
+        @BeforeClass
+        @JvmStatic
+        fun initToolkit() {
+            Thread {
+                Platform.startup{}
+                latch.countDown()
+                Platform.runLater{}
+            }.start()
+            // wait for initialization to finish
+            latch.await(1, TimeUnit.SECONDS)
         }
-        val squareButton = Button("Square")
-        squareButton.onMouseClicked = EventHandler {
-            shapeTool.onCreateShape = { x, y -> shapeTool.onCreateRectangle(x, y) }
-            shapeTool.onMoveShape = { x, y -> shapeTool.onMoveSquare(x, y) }
-            shapeTool.onReleaseShape = { shapeTool.onReleaseRectangle() }
-        }
-        val ellipseButton = Button("Ellipse")
-        ellipseButton.onMouseClicked = EventHandler {
-            shapeTool.onCreateShape = { x, y -> shapeTool.onCreateEllipse(x, y) }
-            shapeTool.onMoveShape = { x, y -> shapeTool.onMoveEllipse(x, y) }
-            shapeTool.onReleaseShape = { shapeTool.onReleaseEllipse() }
-        }
-        val circleButton = Button("Circle")
-        circleButton.onMouseClicked = EventHandler {
-            shapeTool.onCreateShape = { x, y -> shapeTool.onCreateEllipse(x, y) }
-            shapeTool.onMoveShape = { x, y -> shapeTool.onMoveCircle(x, y) }
-            shapeTool.onReleaseShape = { shapeTool.onReleaseEllipse() }
-        }
+    }
 
-        buttonContainer.children.addAll(
-            AppUtils.createHSpacer(),
-            rectangleButton,
-            AppUtils.createHSpacer(),
-            squareButton,
-            AppUtils.createHSpacer(),
-            ellipseButton,
-            AppUtils.createHSpacer(),
-            circleButton,
-            AppUtils.createHSpacer()
-        )
-        controls.add(buttonContainer)
+    @Before
+    fun setup() {
+        Platform.runLater {
+            stage = Stage()
+        }
+        mockHBox = HBox()
+        mockStylebar = AppStylebar()
+        mockShapeTool = ShapeTool(mockHBox, mockStylebar)
+        shapeStyles = ShapeStyles(mockStylebar, mockShapeTool)
+    }
+
+    @Test
+    fun create() {
+        shapeStyles.create()
+        assertFalse(mockStylebar.children.isEmpty())
+        assertEquals(3, mockStylebar.children.size)
+    }
+
+    @Test
+    fun destroy() {
+        shapeStyles.create()
+        shapeStyles.destroy()
+        assertTrue(mockStylebar.children.isEmpty())
     }
 }

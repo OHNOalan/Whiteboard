@@ -1,44 +1,64 @@
 package net.codebot.application.components.tools.styles
 
-import javafx.scene.control.Label
-import javafx.scene.control.Slider
+import javafx.application.Platform
 import javafx.scene.layout.HBox
-import javafx.scene.text.Font
+import javafx.stage.Stage
+import junit.framework.TestCase.*
 import net.codebot.application.components.AppStylebar
-import net.codebot.application.components.AppUtils
 import net.codebot.application.components.tools.EraserTool
-import kotlin.math.roundToInt
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-/**
- * Creates the styles for the eraser tool.
- * @param styleBar The style bar to add the styles to.
- * @param eraserTool A reference to the eraser tool.
- */
-class EraserStyles(styleBar: AppStylebar, eraserTool: EraserTool) :
-    BaseStyles(styleBar) {
-    init {
-        val sliderContainer = HBox()
-        val slider = Slider(0.0, 1.0, 0.5)
-        val sliderLabel = Label("Thickness:")
-        sliderLabel.font = Font(18.0)
-        slider.isShowTickMarks = true
-        slider.isShowTickLabels = true
-        slider.min = 1.0
-        slider.max = 41.0
-        slider.majorTickUnit = 5.0
-        slider.blockIncrement = 1.0
-        slider.value = 30.0
-        slider.valueProperty().addListener { _, _, newVal ->
-            slider.value = (newVal as Double).roundToInt().toDouble()
-            eraserTool.lineWidth = slider.value
+class EraserStylesTest {
+    private lateinit var stage: Stage
+    private lateinit var mockHBox: HBox
+    private lateinit var mockEraserTool: EraserTool
+    private lateinit var mockStylebar: AppStylebar
+    private lateinit var eraserStyles: EraserStyles
+
+    // We need to initialize the Toolkit once and only once.
+    companion object {
+        @JvmStatic
+        private val latch = CountDownLatch(1)
+
+        @BeforeClass
+        @JvmStatic
+        fun initToolkit() {
+            Thread {
+                Platform.startup{}
+                latch.countDown()
+                Platform.runLater{}
+            }.start()
+            // wait for initialization to finish
+            latch.await(1, TimeUnit.SECONDS)
         }
-        sliderContainer.children.addAll(
-            AppUtils.createHSpacer(),
-            sliderLabel,
-            AppUtils.createHSpacer(),
-            slider,
-            AppUtils.createHSpacer()
-        )
-        controls.add(sliderContainer)
+    }
+
+    @Before
+    fun setup() {
+        Platform.runLater {
+            stage = Stage()
+        }
+        mockHBox = HBox()
+        mockStylebar = AppStylebar()
+        mockEraserTool = EraserTool(mockHBox, mockStylebar)
+        eraserStyles = EraserStyles(mockStylebar, mockEraserTool)
+    }
+
+    @Test
+    fun create() {
+        eraserStyles.create()
+        assertFalse(mockStylebar.children.isEmpty())
+        assertEquals(1, mockStylebar.children.size)
+    }
+
+    @Test
+    fun destroy() {
+        eraserStyles.create()
+        eraserStyles.destroy()
+        assertTrue(mockStylebar.children.isEmpty())
     }
 }

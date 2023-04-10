@@ -16,6 +16,9 @@ Supported gradle tasks:
 
 To deploy the whiteboard server to Azure, we need to create a Docker image.
 
+The Docker image copies files from the build folder, so be sure to run the 
+`gradle build` task for the `infra` project first.
+
 Change to the infra folder: `cd infra`
 
 Then build the image: `docker build -t <name of image>`

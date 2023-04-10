@@ -12,5 +12,6 @@ module application {
     requires kotlinx.serialization.core;
     requires kotlinx.serialization.json;
     requires java.prefs;
+    requires junit;
     exports net.codebot.application;
 }

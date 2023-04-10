@@ -1,29 +1,61 @@
 package net.codebot.application.components.tools.styles
 
-import javafx.scene.control.Label
+import javafx.application.Platform
 import javafx.scene.layout.HBox
-import javafx.scene.text.Font
+import javafx.stage.Stage
+import junit.framework.TestCase.*
 import net.codebot.application.components.AppStylebar
-import net.codebot.application.components.AppUtils
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-/**
- * Creates the styles for the text tool.
- *
- * Note that the text tool has no "styles" per se, since all the formatting is attached
- * to the text box itself. There is only a label as a descriptor.
- *
- * @param styleBar The style bar to add the styles to.
- */
-class TextStyles(styleBar: AppStylebar) : BaseStyles(styleBar) {
-    init {
-        val container = HBox()
-        val label = Label("Click and drag to create a text box.")
-        label.font = Font(14.0)
-        container.children.addAll(
-            AppUtils.createHSpacer(),
-            label,
-            AppUtils.createHSpacer()
-        )
-        controls.add(container)
+class TextStylesTest {
+    private lateinit var stage: Stage
+    private lateinit var mockHBox: HBox
+    private lateinit var mockStylebar: AppStylebar
+    private lateinit var textStyles: TextStyles
+
+    // We need to initialize the Toolkit once and only once.
+    companion object {
+        @JvmStatic
+        private val latch = CountDownLatch(1)
+
+        @BeforeClass
+        @JvmStatic
+        fun initToolkit() {
+            Thread {
+                Platform.startup{}
+                latch.countDown()
+                Platform.runLater{}
+            }.start()
+            // wait for initialization to finish
+            latch.await(1, TimeUnit.SECONDS)
+        }
+    }
+
+    @Before
+    fun setup() {
+        Platform.runLater {
+            stage = Stage()
+        }
+        mockHBox = HBox()
+        mockStylebar = AppStylebar()
+        textStyles = TextStyles(mockStylebar)
+    }
+
+    @Test
+    fun create() {
+        textStyles.create()
+        assertFalse(mockStylebar.children.isEmpty())
+        assertEquals(1, mockStylebar.children.size)
+    }
+
+    @Test
+    fun destroy() {
+        textStyles.create()
+        textStyles.destroy()
+        assertTrue(mockStylebar.children.isEmpty())
     }
 }

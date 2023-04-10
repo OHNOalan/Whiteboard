@@ -1,28 +1,61 @@
 package net.codebot.application.components.tools.styles
 
-import javafx.scene.control.Label
+import javafx.application.Platform
 import javafx.scene.layout.HBox
-import javafx.scene.text.Font
+import javafx.stage.Stage
+import junit.framework.TestCase.*
 import net.codebot.application.components.AppStylebar
-import net.codebot.application.components.AppUtils
+import org.junit.Before
+import org.junit.BeforeClass
+import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
-/**
- * Creates the styles for the selection tool.
- *
- * Note that the selection tool has no "styles" per se, only a label as a descriptor.
- *
- * @param styleBar The style bar to add the styles to.
- */
-class SelectStyles(styleBar: AppStylebar) : BaseStyles(styleBar) {
-    init {
-        val container = HBox()
-        val label = Label("Click and drag to select elements.")
-        label.font = Font(14.0)
-        container.children.addAll(
-            AppUtils.createHSpacer(),
-            label,
-            AppUtils.createHSpacer()
-        )
-        controls.add(container)
+class SelectStylesTest {
+    private lateinit var stage: Stage
+    private lateinit var mockHBox: HBox
+    private lateinit var mockStylebar: AppStylebar
+    private lateinit var selectStyles: SelectStyles
+
+    // We need to initialize the Toolkit once and only once.
+    companion object {
+        @JvmStatic
+        private val latch = CountDownLatch(1)
+
+        @BeforeClass
+        @JvmStatic
+        fun initToolkit() {
+            Thread {
+                Platform.startup{}
+                latch.countDown()
+                Platform.runLater{}
+            }.start()
+            // wait for initialization to finish
+            latch.await(1, TimeUnit.SECONDS)
+        }
+    }
+
+    @Before
+    fun setup() {
+        Platform.runLater {
+            stage = Stage()
+        }
+        mockHBox = HBox()
+        mockStylebar = AppStylebar()
+        selectStyles = SelectStyles(mockStylebar)
+    }
+
+    @Test
+    fun create() {
+        selectStyles.create()
+        assertFalse(mockStylebar.children.isEmpty())
+        assertEquals(1, mockStylebar.children.size)
+    }
+
+    @Test
+    fun destroy() {
+        selectStyles.create()
+        selectStyles.destroy()
+        assertTrue(mockStylebar.children.isEmpty())
     }
 }

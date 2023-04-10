@@ -25,8 +25,18 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.2.4")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("org.slf4j:slf4j-simple:1.6.1")
+    implementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testRuntimeOnly("org.junit.vintage:junit-vintage-engine:5.8.2")
+}
+
+sourceSets.getByName("main") {
+    java.srcDir("src/main/java")
+    java.srcDir("src/main/kotlin")
+}
+sourceSets.getByName("test") {
+    java.srcDir("src/test/java")
+    java.srcDir("src/test/kotlin")
 }
 
 tasks.test {
