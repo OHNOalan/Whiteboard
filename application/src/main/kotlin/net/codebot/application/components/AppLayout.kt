@@ -109,6 +109,8 @@ class AppLayout(private val stageReference: Stage) {
             SceneIndex.WHITEBOARD -> {
                 stageReference.width = 1100.0
                 stageReference.height = 800.0
+                stageReference.minWidth = 1000.0
+                stageReference.minHeight = 800.0
                 appCanvas = AppCanvas(whiteboard)
                 AppSidebar(whiteboard, appCanvas, this)
                 AppTopbar(whiteboard, appCanvas)
@@ -119,6 +121,8 @@ class AppLayout(private val stageReference: Stage) {
             SceneIndex.LOGIN_PAGE -> {
                 stageReference.width = 640.0
                 stageReference.height = 480.0
+                stageReference.minWidth = 500.0
+                stageReference.minHeight = 300.0
                 sceneReference.root = loginPage
                 centerStage()
             }
