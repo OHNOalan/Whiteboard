@@ -54,6 +54,7 @@ class AppLoginPage(
                 if (response.success) {
                     loginError.opacity = 0.0
                     registerError.opacity = 0.0
+                    AppData.roomCode = response.roomCode
                     layoutReference.setUsername(response.message)
                 } else {
                     Preferences.userRoot().clear()
